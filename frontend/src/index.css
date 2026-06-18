@@ -1,0 +1,270 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply font-sans bg-gray-50 text-gray-800 antialiased transition-colors duration-200;
+  }
+
+  h1 {
+    @apply text-2xl font-bold;
+  }
+
+  h2 {
+    @apply text-xl font-semibold;
+  }
+
+  h3 {
+    @apply text-lg font-semibold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-2 px-4 rounded-lg border border-gray-300 dark:border-gray-700 transition-colors duration-200;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+
+  .btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm transition-colors duration-200;
+  }
+
+  .card {
+    @apply bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 transition-colors duration-200;
+  }
+
+  .badge-pending {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800;
+  }
+
+  .badge-approved {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;
+  }
+
+  .badge-rejected {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
+  }
+
+  .badge-info {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800;
+  }
+}
+
+/* Custom Dark Mode Styles for Complete Coverage & Readability */
+.dark body {
+  background-color: #0b0f19;
+  color: #f3f4f6;
+}
+
+.dark main {
+  background-color: #0b0f19 !important;
+}
+
+/* Backgrounds and Cards */
+.dark .bg-white {
+  background-color: #111827 !important;
+  /* gray-900 */
+}
+
+.dark .bg-gray-50 {
+  background-color: #0b0f19 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1f2937 !important;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: #1f2937 !important;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: #1f2937 !important;
+}
+
+/* Text Colors */
+.dark .text-gray-900 {
+  color: #ffffff !important;
+}
+
+.dark .text-gray-850 {
+  color: #f3f4f6 !important;
+}
+
+.dark .text-gray-800 {
+  color: #f3f4f6 !important;
+}
+
+.dark .text-gray-700 {
+  color: #e5e7eb !important;
+}
+
+.dark .text-gray-600 {
+  color: #d1d5db !important;
+}
+
+.dark .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+.dark .text-gray-450 {
+  color: #9ca3af !important;
+}
+
+.dark .text-gray-400 {
+  color: #9ca3af !important;
+  /* softer gray for contrast in dark mode */
+}
+
+/* Border Colors */
+.dark .border-gray-100 {
+  border-color: #1f2937 !important;
+}
+
+.dark .border-gray-200 {
+  border-color: #1f2937 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #374151 !important;
+}
+
+.dark .divide-gray-50> :not([hidden])~ :not([hidden]) {
+  border-color: #1f2937 !important;
+}
+
+.dark .divide-gray-100> :not([hidden])~ :not([hidden]) {
+  border-color: #1f2937 !important;
+}
+
+/* Badges and Dynamic Background Colors */
+.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+}
+
+.dark .bg-green-50 {
+  background-color: rgba(34, 197, 94, 0.15) !important;
+  color: #4ade80 !important;
+}
+
+.dark .bg-purple-50 {
+  background-color: rgba(168, 85, 247, 0.15) !important;
+  color: #c084fc !important;
+}
+
+.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+}
+
+.dark .bg-yellow-50 {
+  background-color: rgba(234, 179, 8, 0.15) !important;
+  color: #facc15 !important;
+}
+
+.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+}
+
+/* Badge overrides */
+.dark .badge-pending {
+  background-color: rgba(234, 179, 8, 0.2) !important;
+  color: #facc15 !important;
+}
+
+.dark .badge-approved {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+.dark .badge-rejected {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
+.dark .badge-info {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+/* Form inputs styling */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  border-color: #374151 !important;
+}
+
+.dark input::placeholder {
+  color: #9ca3af !important;
+}
+
+.dark select option {
+  background-color: #111827 !important;
+  color: #ffffff !important;
+}
+
+/* Sidebar and navigation styling */
+.dark aside {
+  background-color: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+.dark aside a {
+  color: #9ca3af !important;
+}
+
+.dark aside a.active {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+}
+
+.dark aside a:hover:not(.active) {
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+}
+
+/* Chat bubble styling */
+.dark .chat-bubble-self {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.dark .chat-bubble-other {
+  background-color: #374151 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Tables styling */
+.dark tr:hover {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.dark border-b {
+  border-color: #1f2937 !important;
+}
+
+/* Modals */
+.dark .modal-content {
+  background-color: #111827 !important;
+  border-color: #1f2937 !important;
+}
