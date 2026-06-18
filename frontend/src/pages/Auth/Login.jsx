@@ -113,13 +113,7 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Demo credentials */}
-        <div className="mt-4 bg-white/10 rounded-xl p-4 text-white text-xs">
-          <p className="font-semibold mb-2">🔑 Demo Credentials</p>
-          <p>Student: student@demo.edu / password123</p>
-          <p>Guide: guide@demo.edu / password123</p>
-          <p>Admin: admin@demo.edu / password123</p>
-        </div>
+      
       </div>
     </div>
   )
