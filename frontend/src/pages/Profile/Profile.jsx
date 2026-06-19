@@ -17,7 +17,10 @@ export default function Profile() {
     phoneNumber: '',
     password: '',
     confirmPassword: '',
-    expertiseDomains: ''
+    expertiseDomains: '',
+    className: '',
+    section: '',
+    year: ''
   })
 
   useEffect(() => {
@@ -31,7 +34,10 @@ export default function Profile() {
           phoneNumber: data.user.phoneNumber ? data.user.phoneNumber.replace('+91', '') : '',
           password: '',
           confirmPassword: '',
-          expertiseDomains: data.user.expertiseDomains ? data.user.expertiseDomains.join(', ') : ''
+          expertiseDomains: data.user.expertiseDomains ? data.user.expertiseDomains.join(', ') : '',
+          className: data.user.className || '',
+          section: data.user.section || '',
+          year: data.user.year || ''
         })
       } catch (err) {
         toast.error('Failed to load profile data')
@@ -92,6 +98,11 @@ export default function Profile() {
       }
       if (formData.password) {
         updatePayload.password = formData.password
+      }
+      if (profileData?.role === 'student' || profileData?.role === 'teacher') {
+        updatePayload.className = formData.className.trim();
+        updatePayload.section = formData.section;
+        updatePayload.year = formData.year;
       }
       if (profileData?.role === 'guide' || profileData?.role === 'teacher') {
         updatePayload.expertiseDomains = formData.expertiseDomains
@@ -185,13 +196,13 @@ export default function Profile() {
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{profileData?.enrollmentNumber || '—'}</p>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Class / Section</label>
+                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Department / Section</label>
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">
                         {profileData?.className} - {profileData?.section}
                       </p>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Academic Year</label>
+                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Year</label>
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{profileData?.year || '—'}</p>
                     </div>
                     <div>
@@ -217,13 +228,17 @@ export default function Profile() {
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{profileData?.facultyId || '—'}</p>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Assigned Class / Section</label>
+                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Assigned Department / Section</label>
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">
                         {profileData?.className} - {profileData?.section}
                       </p>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Department</label>
+                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Assigned Year</label>
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{profileData?.year || '—'}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">General Department</label>
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{profileData?.department || '—'}</p>
                     </div>
                     <div>
@@ -361,6 +376,57 @@ export default function Profile() {
                     />
                   </div>
                 </div>
+
+                {/* Department, Section, Year for Student/Teacher */}
+                {(profileData?.role === 'student' || profileData?.role === 'teacher') && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Department
+                      </label>
+                      <input
+                        type="text"
+                        name="className"
+                        value={formData.className}
+                        onChange={handleChange}
+                        className="input-field"
+                        placeholder="e.g. CSE"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Section
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        name="section"
+                        value={formData.section}
+                        onChange={handleChange}
+                        className="input-field"
+                        placeholder="e.g. 2"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Year
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="4"
+                        name="year"
+                        value={formData.year}
+                        onChange={handleChange}
+                        className="input-field"
+                        placeholder="e.g. 3"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Guide / Teacher Expertise Domains */}
                 {(profileData?.role === 'guide' || profileData?.role === 'teacher') && (

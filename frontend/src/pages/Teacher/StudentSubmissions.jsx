@@ -194,7 +194,7 @@ export default function StudentSubmissions() {
                       <div>
                         <div className="font-bold text-gray-900 dark:text-white">{sub.submittedBy?.name}</div>
                         <div className="text-xs text-gray-400 mt-0.5">Roll: {sub.submittedBy?.enrollmentNumber || 'N/A'}</div>
-                        <div className="text-xs text-gray-400">Class: {sub.className} - {sub.section}</div>
+                        <div className="text-xs text-gray-400">Department: {sub.className} - {sub.section}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 max-w-xs">
@@ -250,7 +250,7 @@ export default function StudentSubmissions() {
                 <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Student Information</p>
                 <p className="font-bold text-gray-850 dark:text-white mt-1">{selectedSubmission.submittedBy?.name}</p>
                 <p className="text-xs text-gray-500 mt-0.5">Roll: {selectedSubmission.submittedBy?.enrollmentNumber || '—'}</p>
-                <p className="text-xs text-gray-500">Class: {selectedSubmission.className} - {selectedSubmission.section}</p>
+                <p className="text-xs text-gray-500">Department: {selectedSubmission.className} - {selectedSubmission.section}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Description</p>

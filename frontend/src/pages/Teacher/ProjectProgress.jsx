@@ -223,7 +223,7 @@ export default function ProjectProgress() {
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <span className="block text-xs text-gray-400">Class & Section</span>
+                          <span className="block text-xs text-gray-400">Department & Section</span>
                           <span className="font-medium">{groupDetails?.className} - {groupDetails?.section}</span>
                         </div>
                         <div>

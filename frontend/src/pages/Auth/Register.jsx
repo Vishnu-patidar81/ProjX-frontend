@@ -106,19 +106,19 @@ export default function Register() {
                     placeholder="e.g. 0101CS21001" className="input-field" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Class/Department</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
                   <input name="className" value={form.className} onChange={handleChange}
-                    placeholder="BCA" className="input-field" required />
+                    placeholder="CSE" className="input-field" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Section</label>
-                  <input name="section" value={form.section} onChange={handleChange}
-                    placeholder="A" className="input-field" required />
+                  <input type="number" min="1" name="section" value={form.section} onChange={handleChange}
+                    placeholder="2" className="input-field" required />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                  <input name="year" value={form.year} onChange={handleChange}
-                    placeholder="3rd Year" className="input-field" required />
+                  <input type="number" min="1" max="4" name="year" value={form.year} onChange={handleChange}
+                    placeholder="3" className="input-field" required />
                 </div>
               </div>
             ) : form.role === 'teacher' ? (
@@ -129,19 +129,24 @@ export default function Register() {
                     placeholder="FAC001" className="input-field" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">General Department</label>
                   <input name="department" value={form.department} onChange={handleChange}
                     placeholder="CSE" className="input-field" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Class/Department</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
                   <input name="className" value={form.className} onChange={handleChange}
-                    placeholder="BCA" className="input-field" required />
+                    placeholder="CSE" className="input-field" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Section</label>
-                  <input name="section" value={form.section} onChange={handleChange}
-                    placeholder="A" className="input-field" required />
+                  <input type="number" min="1" name="section" value={form.section} onChange={handleChange}
+                    placeholder="2" className="input-field" required />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                  <input type="number" min="1" max="4" name="year" value={form.year} onChange={handleChange}
+                    placeholder="3" className="input-field" required />
                 </div>
               </div>
             ) : form.role === 'admin' ? (
