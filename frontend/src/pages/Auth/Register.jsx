@@ -39,7 +39,11 @@ export default function Register() {
 
     setLoading(true)
     try {
-      const { data } = await api.post('/auth/register', form)
+      const submitData = { ...form }
+      if (form.role === 'teacher') {
+        submitData.department = form.className
+      }
+      const { data } = await api.post('/auth/register', submitData)
       login(data.user, data.token)
       toast.success('Registration successful!')
       const dash = data.user.role === 'admin' ? '/admin/dashboard'
@@ -100,7 +104,7 @@ export default function Register() {
             {/* Role-specific ID */}
             {form.role === 'student' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Enrollment Number</label>
                   <input name="enrollmentNumber" value={form.enrollmentNumber} onChange={handleChange}
                     placeholder="e.g. 0101CS21001" className="input-field" required />
@@ -115,7 +119,7 @@ export default function Register() {
                   <input type="number" min="1" name="section" value={form.section} onChange={handleChange}
                     placeholder="2" className="input-field" required />
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
                   <input type="number" min="1" max="4" name="year" value={form.year} onChange={handleChange}
                     placeholder="3" className="input-field" required />
@@ -129,11 +133,6 @@ export default function Register() {
                     placeholder="FAC001" className="input-field" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">General Department</label>
-                  <input name="department" value={form.department} onChange={handleChange}
-                    placeholder="CSE" className="input-field" />
-                </div>
-                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
                   <input name="className" value={form.className} onChange={handleChange}
                     placeholder="CSE" className="input-field" required />
@@ -143,7 +142,7 @@ export default function Register() {
                   <input type="number" min="1" name="section" value={form.section} onChange={handleChange}
                     placeholder="2" className="input-field" required />
                 </div>
-                <div className="col-span-2">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
                   <input type="number" min="1" max="4" name="year" value={form.year} onChange={handleChange}
                     placeholder="3" className="input-field" required />
