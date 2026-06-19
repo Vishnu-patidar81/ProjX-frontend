@@ -6,11 +6,11 @@ import toast from 'react-hot-toast'
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi'
 
 export default function Login() {
-  const [form, setForm]         = useState({ email: '', password: '' })
+  const [form, setForm] = useState({ email: '', password: '' })
   const [showPass, setShowPass] = useState(false)
-  const [loading, setLoading]   = useState(false)
-  const { login }               = useAuth()
-  const navigate                = useNavigate()
+  const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -23,9 +23,9 @@ export default function Login() {
       login(data.user, data.token)
       toast.success(`Welcome back, ${data.user.name}!`)
       const dash = data.user.role === 'admin' ? '/admin/dashboard'
-                 : data.user.role === 'teacher' ? '/teacher/dashboard'
-                 : data.user.role === 'guide'  ? '/guide/dashboard'
-                 : '/student/dashboard'
+        : data.user.role === 'teacher' ? '/teacher/dashboard'
+          : data.user.role === 'guide' ? '/guide/dashboard'
+            : '/student/dashboard'
       navigate(dash)
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed')
@@ -113,7 +113,6 @@ export default function Login() {
           </p>
         </div>
 
-      
       </div>
     </div>
   )
