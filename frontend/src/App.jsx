@@ -7,6 +7,8 @@ import Register from './pages/Auth/Register'
 import ForgotPassword from './pages/Auth/ForgotPassword'
 import ChangePassword from './pages/Auth/ChangePassword'
 import SuperAdminDashboard from './pages/Admin/SuperAdminDashboard'
+import CollegeAdminDashboard from './pages/Admin/CollegeAdminDashboard'
+import ActivateAccount from './pages/Auth/ActivateAccount'
 
 // Student pages
 import StudentDashboard from './pages/Student/StudentDashboard'
@@ -58,6 +60,7 @@ export default function App() {
       <Route path="/login"           element={!user ? <Login />          : <Navigate to={getDashboard(activeMode || user.role)} replace />} />
       <Route path="/register"        element={<Navigate to="/login" replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/activate-account/:token" element={<ActivateAccount />} />
 
       {/* Student routes */}
       <Route element={<ProtectedRoute allowedRoles={['student']} />}>
@@ -92,7 +95,7 @@ export default function App() {
 
       {/* Admin routes */}
       <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/dashboard" element={user?.role === 'college_admin' ? <CollegeAdminDashboard /> : <AdminDashboard />} />
         <Route path="/admin/approvals" element={<ProjectApprovals />} />
         <Route path="/admin/guide-assign" element={<GuideAssign />} />
         <Route path="/admin/marks"     element={<MarksManagement />} />
