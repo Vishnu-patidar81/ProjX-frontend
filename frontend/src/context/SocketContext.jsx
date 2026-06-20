@@ -26,10 +26,12 @@ export function SocketProvider({ children }) {
       return
     }
 
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000'
+    let socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000'
+    // Strip /api or /api/ suffix — Socket.IO binds to the server root, not the API path
+    socketUrl = socketUrl.replace(/\/api\/?$/, '')
     const newSocket = io(socketUrl, {
       autoConnect: true,
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       auth: {
         token: token
       }

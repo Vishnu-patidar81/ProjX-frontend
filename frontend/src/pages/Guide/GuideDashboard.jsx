@@ -174,9 +174,14 @@ export default function GuideDashboard() {
                 const summary = chatSummaries[g._id] || { unreadCount: 0, lastMessage: null }
                 return (
                   <div key={g._id} className="flex flex-col p-4 bg-gray-50 rounded-lg hover:shadow-sm transition-shadow border border-gray-100">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <p className="font-semibold text-gray-800">{g.groupName}</p>
+                        <p className="font-semibold text-gray-800 flex flex-wrap items-center gap-2">
+                          {g.groupName}
+                          {g.guideStatus === 'pending_consent' && (
+                            <span className="badge-pending text-[10px] px-1.5 py-0.5 ring-1 ring-yellow-400 bg-yellow-100 text-yellow-800 font-bold rounded-md shadow-sm">Awaiting Consent</span>
+                          )}
+                        </p>
                         <p className="text-xs text-gray-500">
                           {g.projectDetails?.title || 'No project submitted'} · {g.members?.length} members
                         </p>

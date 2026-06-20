@@ -73,7 +73,7 @@ export default function Navbar({ onToggleSidebar }) {
           {user && (
             <div className="flex items-center gap-3">
               {/* Role badge */}
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${roleColor}`}>
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-full hidden sm:inline-block ${roleColor}`}>
                 {roleLabel}
               </span>
 
