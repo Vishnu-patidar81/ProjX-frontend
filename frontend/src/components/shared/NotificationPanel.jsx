@@ -72,15 +72,9 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
     if (!socket) return
 
     const handleSocketRead = ({ id }) => {
-      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n))
-    }
-    const handleSocketReadAll = () => {
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
-    }
-    const handleSocketArchive = ({ id }) => {
       setNotifications(prev => prev.filter(n => n._id !== id))
     }
-    const handleSocketArchiveAll = () => {
+    const handleSocketReadAll = () => {
       setNotifications([])
     }
     const handleSocketNew = (newNotif) => {
@@ -92,22 +86,18 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
 
     socket.on('notification:read', handleSocketRead)
     socket.on('notification:read-all', handleSocketReadAll)
-    socket.on('notification:archive', handleSocketArchive)
-    socket.on('notification:archive-all', handleSocketArchiveAll)
     socket.on('notification:new', handleSocketNew)
 
     return () => {
       socket.off('notification:read', handleSocketRead)
       socket.off('notification:read-all', handleSocketReadAll)
-      socket.off('notification:archive', handleSocketArchive)
-      socket.off('notification:archive-all', handleSocketArchiveAll)
       socket.off('notification:new', handleSocketNew)
     }
   }, [socket])
 
   const handleNotificationClick = async (n) => {
     if (!n.isRead) {
-      setNotifications(prev => prev.map(item => item._id === n._id ? { ...item, isRead: true } : item))
+      setNotifications(prev => prev.filter(item => item._id !== n._id))
       setUnreadCount(prev => Math.max(0, prev - 1))
       try {
         await api.patch(`/notifications/${n._id}/read`)
@@ -129,29 +119,10 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
     const modeQuery = activeMode ? `?mode=${activeMode}` : ''
     try {
       await api.patch(`/notifications/read-all${modeQuery}`)
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+      setNotifications([])
       setUnreadCount(0)
     } catch (err) {
       console.error('Failed to mark all as read:', err)
-    }
-  }
-
-  const archiveOne = async (id) => {
-    try {
-      await api.patch(`/notifications/${id}/archive`)
-      setNotifications(prev => prev.filter(n => n._id !== id))
-    } catch (err) {
-      console.error('Failed to archive notification:', err)
-    }
-  }
-
-  const archiveAll = async () => {
-    const modeQuery = activeMode ? `?mode=${activeMode}` : ''
-    try {
-      await api.patch(`/notifications/archive-all${modeQuery}`)
-      setNotifications([])
-    } catch (err) {
-      console.error('Failed to archive all notifications:', err)
     }
   }
 
@@ -169,10 +140,6 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
         <div className="flex items-center gap-2">
           <button onClick={markAllRead} className="text-xs text-primary-600 dark:text-primary-400 hover:underline">
             Mark all read
-          </button>
-          <span className="text-gray-300 dark:text-gray-600 text-xs">|</span>
-          <button onClick={archiveAll} className="text-xs text-gray-550 dark:text-gray-400 hover:text-red-500 hover:underline">
-            Archive all
           </button>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <FiX className="w-4 h-4" />
@@ -207,21 +174,9 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
                   <span className="text-[10px] text-gray-400 dark:text-gray-500">
                     {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        archiveOne(n._id);
-                      }}
-                      className="text-xs text-gray-400 hover:text-red-550 dark:hover:text-red-400"
-                      title="Archive notification"
-                    >
-                      Archive
-                    </button>
-                    <span className="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-850 flex items-center gap-0.5">
-                      View &rarr;
-                    </span>
-                  </div>
+                  <span className="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-850 flex items-center gap-0.5">
+                    View &rarr;
+                  </span>
                 </div>
               </div>
             </div>

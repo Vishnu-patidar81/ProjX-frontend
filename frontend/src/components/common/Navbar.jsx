@@ -27,25 +27,17 @@ export default function Navbar({ onToggleSidebar }) {
     const handleNewNotif = () => setUnreadCount(prev => prev + 1)
     const handleReadNotif = () => setUnreadCount(prev => Math.max(0, prev - 1))
     const handleReadAllNotif = () => setUnreadCount(0)
-    const handleSyncNotifs = () => {
-      const modeQuery = activeMode ? `?mode=${activeMode}` : ''
-      api.get(`/notifications${modeQuery}`).then(({ data }) => setUnreadCount(data.unreadCount || 0)).catch(() => {})
-    }
 
     socket.on('notification:new', handleNewNotif)
     socket.on('notification:read', handleReadNotif)
     socket.on('notification:read-all', handleReadAllNotif)
-    socket.on('notification:archive', handleSyncNotifs)
-    socket.on('notification:archive-all', handleSyncNotifs)
 
     return () => {
       socket.off('notification:new', handleNewNotif)
       socket.off('notification:read', handleReadNotif)
       socket.off('notification:read-all', handleReadAllNotif)
-      socket.off('notification:archive', handleSyncNotifs)
-      socket.off('notification:archive-all', handleSyncNotifs)
     }
-  }, [socket, user, activeMode])
+  }, [socket, user])
 
   const handleLogout = () => {
     logout()
