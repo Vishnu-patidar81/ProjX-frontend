@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PageLayout from '../../components/common/PageLayout'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
@@ -13,6 +14,10 @@ export default function ProjectApprovals() {
   const [remarks, setRemarks] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { highlightId } = location.state || {}
+
   const fetchGroups = async () => {
     setLoading(true)
     try {
@@ -22,6 +27,20 @@ export default function ProjectApprovals() {
   }
 
   useEffect(() => { fetchGroups() }, [filter])
+
+  useEffect(() => {
+    if (highlightId && groups.length > 0) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`card-${highlightId}`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          element.classList.add('highlight-active')
+          navigate(location.pathname, { replace: true, state: {} })
+        }
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [highlightId, groups])
 
   const handleApprove = async (groupId, title) => {
     if (!window.confirm(`Approve project "${title}"?`)) return
@@ -75,7 +94,7 @@ export default function ProjectApprovals() {
         ) : (
           <div className="space-y-4">
             {groups.map(g => (
-              <div key={g._id} className="card">
+              <div key={g._id} id={`card-${g._id}`} className="card">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">

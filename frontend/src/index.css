@@ -268,3 +268,18 @@
   background-color: #111827 !important;
   border-color: #1f2937 !important;
 }
+
+@keyframes highlight-fade {
+  0% {
+    background-color: rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+.highlight-active {
+  animation: highlight-fade 3.5s ease-out forwards;
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PageLayout from '../../components/common/PageLayout'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
@@ -26,6 +27,10 @@ export default function GuideMeetings() {
     building: '', roomNumber: '', venue: '', agenda: ''
   })
 
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { highlightId } = location.state || {}
+
   const fetchMeetingsAndGroups = async () => {
     try {
       const [mRes, gRes] = await Promise.allSettled([
@@ -38,6 +43,20 @@ export default function GuideMeetings() {
   }
 
   useEffect(() => { fetchMeetingsAndGroups() }, [])
+
+  useEffect(() => {
+    if (highlightId && meetings.length > 0) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`card-${highlightId}`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          element.classList.add('highlight-active')
+          navigate(location.pathname, { replace: true, state: {} })
+        }
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [highlightId, meetings])
 
   const openReportModal = (meeting) => {
     setReportModal(meeting)
@@ -161,7 +180,7 @@ export default function GuideMeetings() {
         ) : (
           <div className="space-y-4">
             {meetings.map((m) => (
-              <div key={m._id} className="card">
+              <div key={m._id} id={`card-${m._id}`} className="card">
                 <div className="flex flex-col sm:flex-row items-stretch justify-between gap-4 mb-2">
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2">

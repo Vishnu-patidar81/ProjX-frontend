@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PageLayout from '../../components/common/PageLayout'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
@@ -10,6 +11,10 @@ export default function StudentAnnouncements() {
   const [announcements, setAnnouncements] = useState([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState(null)
+
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { highlightId } = location.state || {}
 
   const fetchAnnouncements = async () => {
     try {
@@ -25,6 +30,31 @@ export default function StudentAnnouncements() {
   useEffect(() => {
     fetchAnnouncements()
   }, [])
+
+  useEffect(() => {
+    if (highlightId && announcements.length > 0) {
+      const timer = setTimeout(() => {
+        const ann = announcements.find(a => a._id === highlightId)
+        if (ann) {
+          setExpandedId(ann._id)
+          if (!ann.isRead) {
+            api.put(`/announcements/${ann._id}/read`)
+              .then(() => {
+                setAnnouncements(prev => prev.map(a => a._id === ann._id ? { ...a, isRead: true } : a))
+              })
+              .catch(err => console.error('Failed to mark read', err))
+          }
+          const element = document.getElementById(`card-${highlightId}`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            element.classList.add('highlight-active')
+            navigate(location.pathname, { replace: true, state: {} })
+          }
+        }
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [highlightId, announcements])
 
   const handleExpand = async (ann) => {
     const isExpanding = expandedId !== ann._id
@@ -70,6 +100,7 @@ export default function StudentAnnouncements() {
               return (
                 <div
                   key={ann._id}
+                  id={`card-${ann._id}`}
                   onClick={() => handleExpand(ann)}
                   className={`card cursor-pointer border transition-all duration-200 select-none ${
                     isExpanded 

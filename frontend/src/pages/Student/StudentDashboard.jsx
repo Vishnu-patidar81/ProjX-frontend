@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useSocket } from '../../context/SocketContext'
 import api from '../../services/api'
 import { FiUsers, FiCalendar, FiBarChart2, FiCheckCircle, FiClock, FiAlertCircle, FiMessageSquare } from 'react-icons/fi'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import GroupChat from '../../components/chat/GroupChat'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -23,6 +23,18 @@ export default function StudentDashboard() {
   const [loading, setLoading]     = useState(true)
   const [chatSummary, setChatSummary] = useState({ unreadCount: 0, lastMessage: null })
   const [showChat, setShowChat] = useState(false)
+
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { openChat: openChatState } = location.state || {}
+
+  useEffect(() => {
+    if (openChatState && group) {
+      setShowChat(true)
+      setChatSummary(prev => ({ ...prev, unreadCount: 0 }))
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [openChatState, group])
 
   useEffect(() => {
     const load = async () => {

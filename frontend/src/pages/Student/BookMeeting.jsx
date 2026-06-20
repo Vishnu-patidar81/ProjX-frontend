@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PageLayout from '../../components/common/PageLayout'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
@@ -23,6 +24,10 @@ export default function BookMeeting() {
     building: '', roomNumber: '', venue: '', agenda: '',
   })
 
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { highlightId } = location.state || {}
+
   const fetchData = async () => {
     try {
       const [gRes, mRes] = await Promise.allSettled([
@@ -35,6 +40,20 @@ export default function BookMeeting() {
   }
 
   useEffect(() => { fetchData() }, [])
+
+  useEffect(() => {
+    if (highlightId && meetings.length > 0) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`card-${highlightId}`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          element.classList.add('highlight-active')
+          navigate(location.pathname, { replace: true, state: {} })
+        }
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [highlightId, meetings])
 
   const isLeader = group?.leader?._id === user?._id
 
@@ -125,7 +144,7 @@ export default function BookMeeting() {
         ) : (
           <div className="space-y-4">
             {meetings.map((m) => (
-              <div key={m._id} className="card">
+              <div key={m._id} id={`card-${m._id}`} className="card">
                 <div className="flex flex-col sm:flex-row items-stretch justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-1">

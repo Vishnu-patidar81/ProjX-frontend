@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
@@ -22,6 +23,29 @@ export default function FileSubmission() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showVersionModal, setShowVersionModal] = useState(false)
   const [selectedSubmission, setSelectedSubmission] = useState(null)
+
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { highlightId } = location.state || {}
+
+  useEffect(() => {
+    if (highlightId && submissions.length > 0) {
+      const targetSub = submissions.find(s => s._id === highlightId)
+      if (targetSub) {
+        setSelectedSubmission(targetSub)
+        setShowDetailModal(true)
+        const timer = setTimeout(() => {
+          const element = document.getElementById(`card-${highlightId}`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            element.classList.add('highlight-active')
+            navigate(location.pathname, { replace: true, state: {} })
+          }
+        }, 300)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [highlightId, submissions])
   
   // Submit Form States
   const [form, setForm] = useState({
@@ -238,6 +262,7 @@ export default function FileSubmission() {
             {submissions.map((sub) => (
               <div
                 key={sub._id}
+                id={`card-${sub._id}`}
                 className="card bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
               >
                 <div className="space-y-2 flex-1 min-w-0">

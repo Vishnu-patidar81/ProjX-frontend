@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
@@ -19,6 +20,28 @@ export default function StudentSubmissions() {
   const [loading, setLoading] = useState(true)
   const [showReviewModal, setShowReviewModal] = useState(false)
   const [selectedSubmission, setSelectedSubmission] = useState(null)
+
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { highlightId } = location.state || {}
+
+  useEffect(() => {
+    if (highlightId && submissions.length > 0) {
+      const targetSub = submissions.find(s => s._id === highlightId)
+      if (targetSub) {
+        openReviewModal(targetSub)
+        const timer = setTimeout(() => {
+          const element = document.getElementById(`card-${highlightId}`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            element.classList.add('highlight-active')
+            navigate(location.pathname, { replace: true, state: {} })
+          }
+        }, 300)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [highlightId, submissions])
 
   // Review Form States
   const [reviewForm, setReviewForm] = useState({
@@ -162,7 +185,7 @@ export default function StudentSubmissions() {
               </thead>
               <tbody className="divide-y divide-gray-150 dark:divide-gray-800 text-sm">
                 {submissions.map((sub) => (
-                  <tr key={sub._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
+                  <tr key={sub._id} id={`card-${sub._id}`} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
                     <td className="px-6 py-4">
                       <div>
                         <div className="font-bold text-gray-900 dark:text-white">{sub.submittedBy?.name}</div>

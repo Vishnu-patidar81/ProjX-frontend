@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PageLayout from '../../components/common/PageLayout'
 import api from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
@@ -9,12 +10,30 @@ export default function MyMarks() {
   const [data, setData]     = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { highlightId } = location.state || {}
+
   useEffect(() => {
     api.get('/evaluations/my-marks')
       .then(res => setData(res.data))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (highlightId && data) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`card-${highlightId}`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          element.classList.add('highlight-active')
+          navigate(location.pathname, { replace: true, state: {} })
+        }
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [highlightId, data])
 
   if (loading) return <PageLayout><div className="card animate-pulse h-48" /></PageLayout>
 
@@ -45,7 +64,7 @@ export default function MyMarks() {
               const pct = myMark ? Math.round((myMark.marks / ev.maxMarks) * 100) : null
 
               return (
-                <div key={ev._id} className="card">
+                <div key={ev._id} id={`card-${ev._id}`} className="card">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="font-semibold text-gray-800">{ev.milestone}</h3>

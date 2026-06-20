@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useSocket } from '../../context/SocketContext'
 import api from '../../services/api'
 import { FiUsers, FiCalendar, FiClock, FiCheckCircle, FiMessageSquare, FiTrendingUp } from 'react-icons/fi'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import GroupChat from '../../components/chat/GroupChat'
 import { formatDistanceToNow } from 'date-fns'
 import Modal from '../../components/shared/Modal'
@@ -19,6 +19,10 @@ export default function GuideDashboard() {
   const [loading, setLoading]   = useState(true)
   const [chatSummaries, setChatSummaries] = useState({})
   const [activeChatGroup, setActiveChatGroup] = useState(null)
+
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { highlightId, openChat, openProgress } = location.state || {}
 
   // Progress modal states
   const [viewProgressGroupId, setViewProgressGroupId] = useState(null)
@@ -40,6 +44,33 @@ export default function GuideDashboard() {
       setProgressLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (highlightId && groups.length > 0) {
+      const targetGroup = groups.find(g => g._id === highlightId)
+      if (targetGroup) {
+        if (openChat) {
+          setActiveChatGroup(targetGroup)
+          setChatSummaries(prev => ({
+            ...prev,
+            [targetGroup._id]: { ...(prev[targetGroup._id] || {}), unreadCount: 0 }
+          }))
+        } else if (openProgress) {
+          handleViewProgress(targetGroup._id, targetGroup.groupName)
+        }
+
+        const timer = setTimeout(() => {
+          const element = document.getElementById(`card-${highlightId}`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            element.classList.add('highlight-active')
+            navigate(location.pathname, { replace: true, state: {} })
+          }
+        }, 300)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [highlightId, groups, openChat, openProgress])
 
   useEffect(() => {
     const load = async () => {
@@ -173,7 +204,7 @@ export default function GuideDashboard() {
               {groups.map(g => {
                 const summary = chatSummaries[g._id] || { unreadCount: 0, lastMessage: null }
                 return (
-                  <div key={g._id} className="flex flex-col p-4 bg-gray-50 rounded-lg hover:shadow-sm transition-shadow border border-gray-100">
+                  <div key={g._id} id={`card-${g._id}`} className="flex flex-col p-4 bg-gray-50 rounded-lg hover:shadow-sm transition-shadow border border-gray-100">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <p className="font-semibold text-gray-800 flex flex-wrap items-center gap-2">
