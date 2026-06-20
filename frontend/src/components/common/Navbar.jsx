@@ -9,7 +9,7 @@ import api from '../../services/api'
 import { useEffect } from 'react'
 
 export default function Navbar({ onToggleSidebar }) {
-  const { user, logout, activeMode } = useAuth()
+  const { user, logout, activeMode, switchMode } = useAuth()
   const navigate = useNavigate()
   const [showNotif, setShowNotif] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
@@ -84,10 +84,27 @@ export default function Navbar({ onToggleSidebar }) {
           {/* Right section */}
           {user && (
             <div className="flex items-center gap-3">
-              {/* Role badge */}
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full hidden sm:inline-block ${roleColor}`}>
-                {roleLabel}
-              </span>
+              {/* Role badge or Switcher */}
+              {user?.role === 'teacher' && user?.isAlsoGuide ? (
+                <div className="relative">
+                  <select
+                    value={activeMode || 'teacher'}
+                    onChange={(e) => {
+                      const newMode = e.target.value;
+                      switchMode(newMode);
+                      navigate(newMode === 'teacher' ? '/teacher/dashboard' : '/guide/dashboard');
+                    }}
+                    className="text-xs font-semibold px-3 py-1 rounded-full border bg-white dark:bg-gray-800 text-indigo-700 border-indigo-200 cursor-pointer focus:outline-none"
+                  >
+                    <option value="teacher">Teacher Mode ▼</option>
+                    <option value="guide">Guide Mode ▼</option>
+                  </select>
+                </div>
+              ) : (
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full hidden sm:inline-block ${roleColor}`}>
+                  {roleLabel}
+                </span>
+              )}
 
               {/* Theme toggle button */}
               <button

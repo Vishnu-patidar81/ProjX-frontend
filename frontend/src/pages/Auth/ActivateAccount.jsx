@@ -30,7 +30,9 @@ export default function ActivateAccount() {
         setInvite(data.invite)
         setForm((prev) => ({
           ...prev,
-          name: data.invite.role === 'teacher' ? prev.name : '',
+          name: data.invite.name || '',
+          phoneNumber: data.invite.phoneNumber || '',
+          facultyId: data.invite.facultyId || '',
         }))
         setVerifying(false)
       } catch (err) {
@@ -71,7 +73,7 @@ export default function ActivateAccount() {
         name: form.name,
         phoneNumber: form.phoneNumber,
         password: form.password,
-        facultyId: invite.role === 'teacher' ? form.facultyId || invite.facultyId : undefined,
+        facultyId: (invite.role === 'teacher' || invite.role === 'guide') ? form.facultyId || invite.facultyId : undefined,
         className: invite.className,
         section: invite.section,
         year: invite.year,
@@ -163,6 +165,7 @@ export default function ActivateAccount() {
                   placeholder="Enter your full name"
                   className="input-field pl-10"
                   required
+                  disabled={!!invite?.name}
                 />
               </div>
             </div>
@@ -179,22 +182,24 @@ export default function ActivateAccount() {
                   placeholder="Enter 10-digit mobile number"
                   className="input-field pl-10"
                   required
+                  disabled={!!invite?.phoneNumber}
                 />
               </div>
             </div>
 
-            {/* Faculty ID if teacher */}
-            {invite?.role === 'teacher' && (
+            {/* Faculty ID if teacher or guide */}
+            {(invite?.role === 'teacher' || invite?.role === 'guide') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Faculty ID (Optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
                 <div className="relative">
                   <FiAward className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     name="facultyId"
                     value={form.facultyId}
                     onChange={handleChange}
-                    placeholder="e.g. FAC101"
+                    placeholder="e.g. EMP001"
                     className="input-field pl-10"
+                    disabled={!!invite?.facultyId}
                   />
                 </div>
               </div>

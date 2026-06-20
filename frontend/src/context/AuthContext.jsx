@@ -78,13 +78,20 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const switchMode = (newMode) => {
+    if (user?.role === 'teacher' && user?.isAlsoGuide) {
+      setActiveMode(newMode)
+      localStorage.setItem('projx_mode', newMode)
+    }
+  }
+
   const updateUser = (updatedUser) => {
     setUser(updatedUser)
     localStorage.setItem('projx_user', JSON.stringify(updatedUser))
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, activeMode, login, logout, updateUser, toggleMode }}>
+    <AuthContext.Provider value={{ user, token, loading, activeMode, login, logout, updateUser, toggleMode, switchMode }}>
       {children}
     </AuthContext.Provider>
   )
