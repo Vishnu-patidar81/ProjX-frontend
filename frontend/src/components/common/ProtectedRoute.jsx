@@ -8,13 +8,37 @@ export default function ProtectedRoute({ allowedRoles }) {
 
   if (!user) return <Navigate to="/login" replace />
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // Redirect to own dashboard if accessing wrong role's route
-    const dash = user.role === 'admin' ? '/admin/dashboard'
-                : user.role === 'teacher' ? '/teacher/dashboard'
-                : user.role === 'guide' ? '/guide/dashboard'
-                : '/student/dashboard'
-    return <Navigate to={dash} replace />
+  // Force password change check
+  if (user.mustChangePassword && window.location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />
+  }
+
+  const userRole = user.role
+  const isUserGuide = user.isGuide === true
+
+  if (allowedRoles) {
+    let hasAccess = allowedRoles.includes(userRole)
+    if (!hasAccess) {
+      if (allowedRoles.includes('admin') && (userRole === 'college_admin' || userRole === 'super_admin')) {
+        hasAccess = true
+      }
+      if (allowedRoles.includes('guide') && userRole === 'teacher' && isUserGuide) {
+        hasAccess = true
+      }
+      if (allowedRoles.includes('teacher') && userRole === 'guide') {
+        hasAccess = true
+      }
+    }
+
+    if (!hasAccess) {
+      // Redirect to own dashboard if accessing wrong role's route
+      const dash = userRole === 'super_admin' ? '/super-admin/dashboard'
+                  : (userRole === 'admin' || userRole === 'college_admin') ? '/admin/dashboard'
+                  : userRole === 'teacher' ? '/teacher/dashboard'
+                  : userRole === 'guide' ? '/guide/dashboard'
+                  : '/student/dashboard'
+      return <Navigate to={dash} replace />
+    }
   }
 
   return <Outlet />

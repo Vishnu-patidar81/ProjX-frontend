@@ -5,6 +5,8 @@ import { useAuth } from './context/AuthContext'
 import Login from './pages/Auth/Login'
 import Register from './pages/Auth/Register'
 import ForgotPassword from './pages/Auth/ForgotPassword'
+import ChangePassword from './pages/Auth/ChangePassword'
+import SuperAdminDashboard from './pages/Admin/SuperAdminDashboard'
 
 // Student pages
 import StudentDashboard from './pages/Student/StudentDashboard'
@@ -54,7 +56,7 @@ export default function App() {
     <Routes>
       {/* Public routes */}
       <Route path="/login"           element={!user ? <Login />          : <Navigate to={getDashboard(activeMode || user.role)} replace />} />
-      <Route path="/register"        element={!user ? <Register />        : <Navigate to={getDashboard(activeMode || user.role)} replace />} />
+      <Route path="/register"        element={<Navigate to="/login" replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Student routes */}
@@ -97,9 +99,15 @@ export default function App() {
         <Route path="/admin/groups"    element={<AllGroups />} />
       </Route>
 
-      {/* Universal Profile Route */}
+      {/* Super Admin Routes */}
+      <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
+        <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+      </Route>
+
+      {/* Universal Profile & Change Password Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/profile" element={<Profile />} />
+        <Route path="/change-password" element={<ChangePassword />} />
       </Route>
 
       {/* Default redirect */}
@@ -110,7 +118,8 @@ export default function App() {
 }
 
 function getDashboard(role) {
-  if (role === 'admin')  return '/admin/dashboard'
+  if (role === 'super_admin') return '/super-admin/dashboard'
+  if (role === 'admin' || role === 'college_admin') return '/admin/dashboard'
   if (role === 'teacher') return '/teacher/dashboard'
   if (role === 'guide')  return '/guide/dashboard'
   return '/student/dashboard'

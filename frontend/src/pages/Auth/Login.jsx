@@ -22,11 +22,17 @@ export default function Login() {
       const { data } = await api.post('/auth/login', form)
       login(data.user, data.token)
       toast.success(`Welcome back, ${data.user.name}!`)
-      const dash = data.user.role === 'admin' ? '/admin/dashboard'
-        : data.user.role === 'teacher' ? '/teacher/dashboard'
+      
+      if (data.user.mustChangePassword) {
+        navigate('/change-password')
+      } else {
+        const dash = data.user.role === 'super_admin' ? '/super-admin/dashboard'
+          : (data.user.role === 'admin' || data.user.role === 'college_admin') ? '/admin/dashboard'
+          : data.user.role === 'teacher' ? '/teacher/dashboard'
           : data.user.role === 'guide' ? '/guide/dashboard'
-            : '/student/dashboard'
-      navigate(dash)
+          : '/student/dashboard'
+        navigate(dash)
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed')
     } finally {
@@ -53,16 +59,16 @@ export default function Login() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Institutional Email
+                Email or Enrollment Number
               </label>
               <div className="relative">
                 <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
-                  type="email"
+                  type="text"
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  placeholder="you@institution.edu"
+                  placeholder="you@institution.edu or Enrollment No."
                   className="input-field pl-10"
                   required
                 />
@@ -105,12 +111,7 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary-600 font-medium hover:underline">
-              Register
-            </Link>
-          </p>
+          {/* Register link disabled for ERP migration */}
         </div>
 
       </div>
