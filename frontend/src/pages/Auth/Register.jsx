@@ -95,9 +95,7 @@ export default function Register() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
               <select name="role" value={form.role} onChange={handleChange} className="input-field">
                 <option value="student">Student</option>
-                <option value="guide">Guide / Faculty</option>
                 <option value="teacher">Teacher</option>
-                <option value="admin">Admin</option>
               </select>
             </div>
 

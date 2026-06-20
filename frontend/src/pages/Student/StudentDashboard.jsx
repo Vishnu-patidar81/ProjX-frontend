@@ -38,7 +38,7 @@ export default function StudentDashboard() {
         }
         if (mRes.status === 'fulfilled') setMeetings(mRes.value.data.meetings || [])
 
-        if (activeGroup) {
+        if (activeGroup && activeGroup.guide && activeGroup.guideStatus === 'accepted') {
           const chatRes = await api.get(`/chat/${activeGroup._id}/summary`)
           setChatSummary(chatRes.data)
         }
@@ -145,7 +145,7 @@ export default function StudentDashboard() {
         )}
 
         {/* Group Chat Section */}
-        {group && (
+        {group && group.guide && group.guideStatus === 'accepted' && (
           <div className="card cursor-pointer hover:shadow-md transition-all duration-200 border-l-4 border-l-primary-500" onClick={openChat}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -206,7 +206,7 @@ export default function StudentDashboard() {
       </div>
 
       {/* Floating Chat Trigger */}
-      {group && (
+      {group && group.guide && group.guideStatus === 'accepted' && (
         <button
           onClick={openChat}
           className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-primary-600 to-indigo-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 group hover:scale-105 animate-bounce"

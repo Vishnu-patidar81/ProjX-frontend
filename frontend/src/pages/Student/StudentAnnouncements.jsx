@@ -4,6 +4,7 @@ import api from '../../services/api'
 import toast from 'react-hot-toast'
 import { FiFileText, FiPaperclip, FiCalendar, FiChevronDown, FiChevronUp, FiInfo } from 'react-icons/fi'
 import { format } from 'date-fns'
+import { resolveFileUrl } from '../../utils/uploadHelper'
 
 export default function StudentAnnouncements() {
   const [announcements, setAnnouncements] = useState([])
@@ -123,10 +124,9 @@ export default function StudentAnnouncements() {
                               {ann.attachments.map((file, idx) => (
                                 <a
                                   key={idx}
-                                  href={file.filePath}
-                                  download={file.originalName}
+                                  href={resolveFileUrl(file.filePath)}
                                   target="_blank"
-                                  rel="noreferrer"
+                                  rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1.5 text-xs bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-750 dark:text-gray-300 px-3.5 py-2 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors font-medium"
                                 >
                                   <FiPaperclip className="w-3.5 h-3.5 flex-shrink-0" />

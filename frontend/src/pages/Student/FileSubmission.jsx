@@ -10,8 +10,11 @@ import {
   FiCornerDownRight, FiPaperclip, FiUser, FiCalendar
 } from 'react-icons/fi'
 import { format } from 'date-fns'
+import { useAuth } from '../../context/AuthContext'
+import { uploadToImageKit, resolveFileUrl } from '../../utils/uploadHelper'
 
 export default function FileSubmission() {
+  const { user } = useAuth()
   const [submissions, setSubmissions] = useState([])
   const [recipients, setRecipients] = useState({ teachers: [], guide: null })
   const [loading, setLoading] = useState(true)
@@ -104,43 +107,10 @@ export default function FileSubmission() {
     if (!file) {
       return toast.error('Please select a file to upload')
     }
-
     setSubmitting(true)
     const uploadToast = toast.loading('Uploading file to ImageKit...')
     try {
-      // 1. Get ImageKit Signature from backend
-      const { data: auth } = await api.get('/submissions/imagekit-auth')
-
-      let uploadResult
-      if (!auth.publicKey || auth.publicKey === 'your_public_key' || auth.publicKey === 'dummy_public_key' || auth.publicKey.startsWith('your_')) {
-        // Dev Mock Fallback
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        uploadResult = {
-          name: file.name,
-          url: `https://ik.imagekit.io/demo/submissions/mock_${Date.now()}_${file.name}`,
-          fileId: `file_${Math.random().toString(36).substring(2, 9)}`,
-          size: file.size
-        }
-      } else {
-        // 2. Post file directly to ImageKit
-        const uploadFormData = new FormData()
-        uploadFormData.append('file', file)
-        uploadFormData.append('fileName', file.name)
-        uploadFormData.append('publicKey', auth.publicKey)
-        uploadFormData.append('signature', auth.signature)
-        uploadFormData.append('expire', auth.expire)
-        uploadFormData.append('token', auth.token)
-        uploadFormData.append('useUniqueFileName', 'true')
-        uploadFormData.append('folder', '/submissions')
-
-        const response = await axios.post(
-          'https://upload.imagekit.io/api/v1/files/upload',
-          uploadFormData,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
-        )
-        uploadResult = response.data
-      }
-
+      const uploadResult = await uploadToImageKit(file, 'student-submissions', user)
       toast.dismiss(uploadToast)
       toast.loading('Saving submission details...', { id: uploadToast })
 
@@ -176,43 +146,10 @@ export default function FileSubmission() {
     if (!versionFile) {
       return toast.error('Please select a file')
     }
-
     setVersionSubmitting(true)
     const uploadToast = toast.loading('Uploading new version to ImageKit...')
     try {
-      // 1. Get auth parameters
-      const { data: auth } = await api.get('/submissions/imagekit-auth')
-
-      let uploadResult
-      if (!auth.publicKey || auth.publicKey === 'your_public_key' || auth.publicKey === 'dummy_public_key' || auth.publicKey.startsWith('your_')) {
-        // Dev Mock Fallback
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        uploadResult = {
-          name: versionFile.name,
-          url: `https://ik.imagekit.io/demo/submissions/mock_${Date.now()}_${versionFile.name}`,
-          fileId: `file_${Math.random().toString(36).substring(2, 9)}`,
-          size: versionFile.size
-        }
-      } else {
-        // 2. Post file directly to ImageKit
-        const uploadFormData = new FormData()
-        uploadFormData.append('file', versionFile)
-        uploadFormData.append('fileName', versionFile.name)
-        uploadFormData.append('publicKey', auth.publicKey)
-        uploadFormData.append('signature', auth.signature)
-        uploadFormData.append('expire', auth.expire)
-        uploadFormData.append('token', auth.token)
-        uploadFormData.append('useUniqueFileName', 'true')
-        uploadFormData.append('folder', '/submissions')
-
-        const response = await axios.post(
-          'https://upload.imagekit.io/api/v1/files/upload',
-          uploadFormData,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
-        )
-        uploadResult = response.data
-      }
-
+      const uploadResult = await uploadToImageKit(versionFile, 'student-submissions', user)
       toast.dismiss(uploadToast)
       toast.loading('Adding new version to submission...', { id: uploadToast })
 
@@ -327,7 +264,7 @@ export default function FileSubmission() {
                   <div className="mt-3 inline-flex items-center gap-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/40 dark:hover:bg-gray-800/70 p-2 rounded-lg border border-gray-200 dark:border-gray-700 max-w-full">
                     <FiPaperclip className="w-4 h-4 text-gray-400 shrink-0" />
                     <a
-                      href={sub.fileUrl}
+                      href={resolveFileUrl(sub.fileUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-primary-600 dark:text-primary-400 hover:underline font-semibold truncate max-w-xs md:max-w-md"
@@ -571,7 +508,7 @@ export default function FileSubmission() {
                   <div className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/30 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 max-w-full">
                     <FiPaperclip className="w-4 h-4 text-gray-400 shrink-0" />
                     <a
-                      href={ver.fileUrl}
+                      href={resolveFileUrl(ver.fileUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-primary-600 dark:text-primary-400 hover:underline font-semibold truncate"
@@ -612,10 +549,9 @@ export default function FileSubmission() {
                             <FiCornerDownRight className="w-3.5 h-3.5" /> Reviewed File Attachment:
                           </p>
                           <a
-                            href={ver.reviewAttachment.fileUrl}
-                            download={ver.reviewAttachment.fileName}
+                            href={resolveFileUrl(ver.reviewAttachment.fileUrl)}
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 text-xs bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors"
                           >
                             <FiDownload className="w-3.5 h-3.5 text-primary-500" />

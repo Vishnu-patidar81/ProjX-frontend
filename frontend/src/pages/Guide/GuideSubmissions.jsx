@@ -10,8 +10,11 @@ import {
   FiPaperclip, FiBookOpen, FiCornerDownRight, FiMessageSquare
 } from 'react-icons/fi'
 import { format } from 'date-fns'
+import { useAuth } from '../../context/AuthContext'
+import { uploadToImageKit, resolveFileUrl } from '../../utils/uploadHelper'
 
 export default function GuideSubmissions() {
+  const { user } = useAuth()
   const [submissions, setSubmissions] = useState([])
   const [loading, setLoading] = useState(true)
   const [showReviewModal, setShowReviewModal] = useState(false)
@@ -68,47 +71,17 @@ export default function GuideSubmissions() {
 
     try {
       let reviewAttachment = undefined
-
       // 1. Upload reviewed file to ImageKit if selected
       if (reviewFile) {
         toast.loading('Uploading corrected file to ImageKit...', { id: reviewToast })
-        const { data: auth } = await api.get('/submissions/imagekit-auth')
-
-        if (!auth.publicKey || auth.publicKey === 'your_public_key' || auth.publicKey === 'dummy_public_key' || auth.publicKey.startsWith('your_')) {
-          // Dev Mock Fallback
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          reviewAttachment = {
-            fileName: reviewFile.name,
-            fileUrl: `https://ik.imagekit.io/demo/reviews/mock_${Date.now()}_${reviewFile.name}`,
-            imageKitFileId: `file_${Math.random().toString(36).substring(2, 9)}`,
-            fileSize: reviewFile.size,
-          }
-        } else {
-          const uploadFormData = new FormData()
-          uploadFormData.append('file', reviewFile)
-          uploadFormData.append('fileName', reviewFile.name)
-          uploadFormData.append('publicKey', auth.publicKey)
-          uploadFormData.append('signature', auth.signature)
-          uploadFormData.append('expire', auth.expire)
-          uploadFormData.append('token', auth.token)
-          uploadFormData.append('useUniqueFileName', 'true')
-          uploadFormData.append('folder', '/reviews')
-
-          const response = await axios.post(
-            'https://upload.imagekit.io/api/v1/files/upload',
-            uploadFormData,
-            { headers: { 'Content-Type': 'multipart/form-data' } }
-          )
-
-          reviewAttachment = {
-            fileName: response.data.name,
-            fileUrl: response.data.url,
-            imageKitFileId: response.data.fileId,
-            fileSize: response.data.size,
-          }
+        const uploadResult = await uploadToImageKit(reviewFile, 'student-submissions', user)
+        reviewAttachment = {
+          fileName: uploadResult.name,
+          fileUrl: uploadResult.url,
+          imageKitFileId: uploadResult.fileId,
+          fileSize: uploadResult.size,
         }
       }
-
       toast.loading('Saving review details in database...', { id: reviewToast })
 
       // 2. Submit review to backend
@@ -203,9 +176,9 @@ export default function GuideSubmissions() {
                         <div className="text-xs text-gray-455 dark:text-gray-400 mt-0.5 line-clamp-1">{sub.description}</div>
                         <div className="mt-2 text-xs">
                           <a
-                            href={sub.fileUrl}
+                            href={resolveFileUrl(sub.fileUrl)}
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 font-medium text-primary-600 dark:text-primary-400 hover:underline"
                           >
                             <FiPaperclip className="w-3.5 h-3.5" /> {sub.fileName}
@@ -284,9 +257,9 @@ export default function GuideSubmissions() {
                     <div className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/40 p-2 rounded-lg border border-gray-200 dark:border-gray-750 max-w-full">
                       <FiPaperclip className="w-4 h-4 text-gray-400" />
                       <a
-                        href={ver.fileUrl}
+                        href={resolveFileUrl(ver.fileUrl)}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="text-xs text-primary-600 dark:text-primary-400 hover:underline font-semibold truncate"
                       >
                         {ver.fileName}
@@ -302,9 +275,9 @@ export default function GuideSubmissions() {
                         {ver.reviewAttachment && (
                           <div className="pt-1">
                             <a
-                              href={ver.reviewAttachment.fileUrl}
+                              href={resolveFileUrl(ver.reviewAttachment.fileUrl)}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-[11px] text-primary-600 dark:text-primary-400 hover:underline font-medium"
                             >
                               <FiDownload className="w-3.5 h-3.5" /> Reviewed File: {ver.reviewAttachment.fileName}

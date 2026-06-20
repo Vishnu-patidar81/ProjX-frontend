@@ -5,8 +5,11 @@ import toast from 'react-hot-toast'
 import { FiPlus, FiFileText, FiTrash2, FiEdit2, FiPaperclip, FiCalendar, FiEye, FiDownload } from 'react-icons/fi'
 import Modal from '../../components/shared/Modal'
 import { format } from 'date-fns'
+import { useAuth } from '../../context/AuthContext'
+import { uploadToImageKit, resolveFileUrl } from '../../utils/uploadHelper'
 
 export default function TeacherAnnouncements() {
+  const { user } = useAuth()
   const [announcements, setAnnouncements] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -34,26 +37,14 @@ export default function TeacherAnnouncements() {
   useEffect(() => {
     fetchAnnouncements()
   }, [])
-
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files || [])
-    const promises = files.map(file => {
-      return new Promise((resolve) => {
-        const reader = new FileReader()
-        reader.onload = () => {
-          resolve({
-            name: file.name,
-            mimeType: file.type || 'application/octet-stream',
-            data: reader.result,
-            fileSize: file.size
-          })
-        }
-        reader.readAsDataURL(file)
-      })
-    })
-    Promise.all(promises).then(newFiles => {
-      setAttachments(prev => [...prev, ...newFiles])
-    })
+    const newAttachments = files.map(file => ({
+      name: file.name,
+      fileSize: file.size,
+      fileObject: file
+    }))
+    setAttachments(prev => [...prev, ...newAttachments])
   }
 
   const removeAttachment = (index) => {
@@ -85,11 +76,30 @@ export default function TeacherAnnouncements() {
     }
 
     setSubmitting(true)
+    const uploadToast = toast.loading('Uploading attachments to ImageKit...')
     try {
+      const processedAttachments = await Promise.all(
+        attachments.map(async (file) => {
+          if (file.fileObject) {
+            const uploadResult = await uploadToImageKit(file.fileObject, 'announcements', user)
+            return {
+              fileName: uploadResult.name,
+              originalName: file.name,
+              mimeType: file.fileObject.type || 'application/octet-stream',
+              filePath: uploadResult.url,
+              fileSize: uploadResult.size
+            }
+          }
+          return file
+        })
+      )
+
+      toast.dismiss(uploadToast)
+
       const payload = {
         title: form.title,
         message: form.message,
-        attachments: attachments,
+        attachments: processedAttachments,
         targetType: 'class',
         expiryDate: form.expiryDate || undefined
       }
@@ -104,6 +114,7 @@ export default function TeacherAnnouncements() {
       setShowModal(false)
       fetchAnnouncements()
     } catch (err) {
+      toast.dismiss(uploadToast)
       toast.error(err.response?.data?.message || 'Submission failed')
     } finally {
       setSubmitting(false)
@@ -172,10 +183,9 @@ export default function TeacherAnnouncements() {
                           {ann.attachments.map((file, idx) => (
                             <a
                               key={idx}
-                              href={file.filePath}
-                              download={file.originalName}
+                              href={resolveFileUrl(file.filePath)}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 text-xs bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors"
                             >
                               <FiPaperclip className="w-3.5 h-3.5 flex-shrink-0" />

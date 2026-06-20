@@ -237,10 +237,7 @@ export default function Profile() {
                       <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Assigned Year</label>
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{profileData?.year || '—'}</p>
                     </div>
-                    <div>
-                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">General Department</label>
-                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{profileData?.department || '—'}</p>
-                    </div>
+
                     <div>
                       <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                         <FiTag className="w-3.5 h-3.5" /> Expertise Domains
