@@ -36,6 +36,10 @@ export default function CollegeAdminDashboard() {
   const [sessionForm, setSessionForm] = useState({ sessionYear: '', isActive: true })
   const [semesterForm, setSemesterForm] = useState({ number: '', isActive: true })
 
+  const handleChange = (e) => {
+    setTeacherForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
   useEffect(() => {
     fetchTeachers()
     fetchTeacherInvites()
@@ -777,7 +781,7 @@ export default function CollegeAdminDashboard() {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Full Name</label>
                   <input
-                    value={teacherForm.name}
+                    value={teacherForm?.name || ''}
                     onChange={handleChange}
                     name="name"
                     placeholder="Enter full name"
@@ -789,12 +793,12 @@ export default function CollegeAdminDashboard() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Email Address</label>
                   <input
                     type="email"
-                    value={teacherForm.email}
+                    value={teacherForm?.email || ''}
                     onChange={handleChange}
                     name="email"
                     placeholder="teacher@institution.edu"
                     className="input-field"
-                    disabled={teacherModal.mode === 'edit'}
+                    disabled={teacherModal?.mode === 'edit'}
                     required
                   />
                 </div>
@@ -804,7 +808,7 @@ export default function CollegeAdminDashboard() {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Phone Number (10 digits)</label>
                   <input
-                    value={teacherForm.phoneNumber}
+                    value={teacherForm?.phoneNumber || ''}
                     onChange={handleChange}
                     name="phoneNumber"
                     placeholder="Phone number"
@@ -815,7 +819,7 @@ export default function CollegeAdminDashboard() {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Faculty ID</label>
                   <input
-                    value={teacherForm.facultyId}
+                    value={teacherForm?.facultyId || ''}
                     onChange={handleChange}
                     name="facultyId"
                     placeholder="e.g. TCH001"
@@ -828,7 +832,7 @@ export default function CollegeAdminDashboard() {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Department</label>
                   <input
-                    value={teacherForm.className}
+                    value={teacherForm?.className || ''}
                     onChange={handleChange}
                     name="className"
                     placeholder="e.g. CSE"
@@ -840,7 +844,7 @@ export default function CollegeAdminDashboard() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Section</label>
                   <input
                     type="number"
-                    value={teacherForm.section}
+                    value={teacherForm?.section || ''}
                     onChange={handleChange}
                     name="section"
                     placeholder="e.g. 2"
@@ -852,7 +856,7 @@ export default function CollegeAdminDashboard() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Year</label>
                   <input
                     type="number"
-                    value={teacherForm.year}
+                    value={teacherForm?.year || ''}
                     onChange={handleChange}
                     name="year"
                     placeholder="e.g. 3"
@@ -866,8 +870,8 @@ export default function CollegeAdminDashboard() {
                 <input
                   type="checkbox"
                   name="isGuide"
-                  checked={teacherForm.isGuide}
-                  onChange={(e) => setTeacherForm({ ...teacherForm, isGuide: e.target.checked })}
+                  checked={!!teacherForm?.isGuide}
+                  onChange={(e) => setTeacherForm(prev => ({ ...prev, isGuide: e.target.checked }))}
                   className="w-5 h-5 text-primary-600 rounded"
                 />
                 <div>

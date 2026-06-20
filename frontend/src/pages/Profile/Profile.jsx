@@ -137,7 +137,9 @@ export default function Profile() {
     student: 'Student',
     teacher: 'Teacher',
     guide: 'Guide',
-    admin: 'Administrator'
+    admin: 'Administrator',
+    super_admin: 'Super Administrator',
+    college_admin: 'College Administrator'
   }
 
   return (
