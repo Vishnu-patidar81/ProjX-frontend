@@ -41,9 +41,7 @@ const adminLinks = [
   { to: '/admin/groups',      icon: FiList,        label: 'All Groups' },
 ]
 
-const superAdminLinks = [
-  { to: '/super-admin/dashboard', icon: FiHome, label: 'Dashboard' },
-]
+
 
 const collegeAdminLinks = [
   { to: '/admin/dashboard', icon: FiHome, label: 'Dashboard' },
@@ -56,9 +54,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const displayRole = user?.role === 'teacher' && user?.isAlsoGuide ? activeMode : user?.role
 
   let links = []
-  if (displayRole === 'super_admin') {
-    links = [...superAdminLinks]
-  } else if (displayRole === 'college_admin') {
+  if (displayRole === 'college_admin') {
     links = [...collegeAdminLinks]
   } else if (displayRole === 'admin') {
     links = [...adminLinks]

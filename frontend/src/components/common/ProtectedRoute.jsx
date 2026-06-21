@@ -1,19 +1,39 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
-export default function ProtectedRoute({ allowedRoles }) {
+export default function ProtectedRoute({ allowedRoles, isSystemPortal }) {
   const { user, loading } = useAuth()
+  const location = useLocation()
 
   if (loading) return null
 
-  if (!user) return <Navigate to="/login" replace />
+  const accessingSystem = isSystemPortal || location.pathname.startsWith('/system')
+
+  if (!user) {
+    if (accessingSystem) {
+      return <Navigate to="/system/login" replace />
+    }
+    return <Navigate to="/login" replace />
+  }
 
   // Force password change check
-  if (user.mustChangePassword && window.location.pathname !== '/change-password') {
+  if (user.mustChangePassword && location.pathname !== '/change-password') {
     return <Navigate to="/change-password" replace />
   }
+
   const userRole = user.role
   const isUserGuide = user.isGuide === true
+
+  if (accessingSystem) {
+    if (userRole !== 'super_admin') {
+      return <Navigate to="/login" replace />
+    }
+    return <Outlet />
+  }
+
+  if (userRole === 'super_admin' && !accessingSystem) {
+    return <Navigate to="/system/dashboard" replace />
+  }
 
   if (allowedRoles) {
     let hasAccess = allowedRoles.includes(userRole)
@@ -31,7 +51,7 @@ export default function ProtectedRoute({ allowedRoles }) {
 
     if (!hasAccess) {
       // Redirect to own dashboard if accessing wrong role's route
-      const dash = userRole === 'super_admin' ? '/super-admin/dashboard'
+      const dash = userRole === 'super_admin' ? '/system/dashboard'
                   : (userRole === 'admin' || userRole === 'college_admin') ? '/admin/dashboard'
                   : userRole === 'teacher' ? '/teacher/dashboard'
                   : userRole === 'guide' ? '/guide/dashboard'

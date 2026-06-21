@@ -44,7 +44,7 @@ export default function ChangePassword() {
       updateUser(updatedUser)
 
       // Navigate to corresponding dashboard
-      const dash = updatedUser.role === 'super_admin' ? '/super-admin/dashboard'
+      const dash = updatedUser.role === 'super_admin' ? '/system/dashboard'
                  : (updatedUser.role === 'admin' || updatedUser.role === 'college_admin') ? '/admin/dashboard'
                  : updatedUser.role === 'teacher' ? '/teacher/dashboard'
                  : updatedUser.role === 'guide' ? '/guide/dashboard'

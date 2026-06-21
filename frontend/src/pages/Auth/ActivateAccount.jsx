@@ -85,7 +85,7 @@ export default function ActivateAccount() {
       login(data.user, data.token)
       toast.success('Account activated successfully! Welcome to ProjX.')
       
-      const dash = data.user.role === 'super_admin' ? '/super-admin/dashboard'
+      const dash = data.user.role === 'super_admin' ? '/system/dashboard'
                  : (data.user.role === 'admin' || data.user.role === 'college_admin') ? '/admin/dashboard'
                  : data.user.role === 'teacher' ? '/teacher/dashboard'
                  : '/student/dashboard'

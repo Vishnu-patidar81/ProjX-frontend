@@ -10,6 +10,7 @@ import SuperAdminDashboard from './pages/Admin/SuperAdminDashboard'
 import CollegeAdminDashboard from './pages/Admin/CollegeAdminDashboard'
 import ActivateAccount from './pages/Auth/ActivateAccount'
 import CompleteProfile from './pages/Auth/CompleteProfile'
+import SystemLogin from './pages/Auth/SystemLogin'
 
 // Student pages
 import StudentDashboard from './pages/Student/StudentDashboard'
@@ -63,6 +64,7 @@ export default function App() {
       <Route path="/register"        element={<Navigate to="/login" replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/activate-account/:token" element={<ActivateAccount />} />
+      <Route path="/system/login"    element={!user ? <SystemLogin />    : <Navigate to="/system/dashboard" replace />} />
 
       {/* Student routes */}
       <Route element={<ProtectedRoute allowedRoles={['student']} />}>
@@ -106,8 +108,8 @@ export default function App() {
       </Route>
 
       {/* Super Admin Routes */}
-      <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
-        <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+      <Route element={<ProtectedRoute allowedRoles={['super_admin']} isSystemPortal={true} />}>
+        <Route path="/system/dashboard" element={<SuperAdminDashboard />} />
       </Route>
 
       {/* Universal Profile & Change Password Routes */}
@@ -125,7 +127,7 @@ export default function App() {
 }
 
 function getDashboard(role) {
-  if (role === 'super_admin') return '/super-admin/dashboard'
+  if (role === 'super_admin') return '/system/dashboard'
   if (role === 'admin' || role === 'college_admin') return '/admin/dashboard'
   if (role === 'teacher') return '/teacher/dashboard'
   if (role === 'guide')  return '/guide/dashboard'

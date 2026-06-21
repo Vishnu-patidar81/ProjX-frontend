@@ -160,7 +160,7 @@ export const getNotificationRoute = (notification, role) => {
         return { path: '/admin/dashboard', state: { highlightId: referenceId } };
       }
       if (role === 'super_admin') {
-        return { path: '/super-admin/dashboard', state: { highlightId: referenceId } };
+        return { path: '/system/dashboard', state: { highlightId: referenceId } };
       }
       break;
 
@@ -171,7 +171,7 @@ export const getNotificationRoute = (notification, role) => {
     case 'subscription_updated':
     case 'college_archived':
       if (role === 'super_admin') {
-        return { path: '/super-admin/dashboard', state: { highlightId: referenceId } };
+        return { path: '/system/dashboard', state: { highlightId: referenceId } };
       }
       if (role === 'admin' || role === 'college_admin') {
         return { path: '/admin/dashboard', state: { highlightId: referenceId } };

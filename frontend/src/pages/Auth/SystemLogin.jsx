@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi'
 
-export default function Login() {
+export default function SystemLogin() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -19,61 +19,46 @@ export default function Login() {
     if (!form.email || !form.password) return toast.error('All fields are required')
     setLoading(true)
     try {
-      const { data } = await api.post('/auth/login', form)
+      const { data } = await api.post('/auth/system/login', form)
       login(data.user, data.token)
-      toast.success(`Welcome back, ${data.user.name}!`)
-      
-      if (data.user.mustChangePassword) {
-        navigate('/change-password')
-      } else {
-        const dash = data.user.role === 'super_admin' ? '/system/dashboard'
-          : (data.user.role === 'admin' || data.user.role === 'college_admin') ? '/admin/dashboard'
-          : data.user.role === 'teacher' ? '/teacher/dashboard'
-          : data.user.role === 'guide' ? '/guide/dashboard'
-          : '/student/dashboard'
-        navigate(dash)
-      }
+      toast.success(`Welcome to the System Portal, ${data.user.name}!`)
+      navigate('/system/dashboard')
     } catch (err) {
-      if (err.response?.data?.isSuperAdmin) {
-        toast.error(err.response.data.message)
-        setTimeout(() => navigate('/system/login'), 1500)
-      } else {
-        toast.error(err.response?.data?.message || 'Login failed')
-      }
+      toast.error(err.response?.data?.message || 'Access denied or login failed')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-700 to-accent flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-white rounded-2xl shadow-lg mb-4">
-            <span className="text-primary-700 font-bold text-xl">PX</span>
+            <span className="text-slate-900 font-bold text-xl">SYS</span>
           </div>
-          <h1 className="text-white text-2xl font-bold">ProjX</h1>
-          <p className="text-primary-200 text-sm mt-1">Minor Project Management System</p>
+          <h1 className="text-white text-2xl font-bold">ProjX System Portal</h1>
+          <p className="text-slate-350 text-sm mt-1">Super Administrator Access</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">Sign In</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-6">System Log In</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email or Enrollment Number
+                Super Admin Email
               </label>
               <div className="relative">
                 <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
-                  type="text"
+                  type="email"
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  placeholder="you@institution.edu or Enrollment No."
+                  placeholder="superadmin@projx.com"
                   className="input-field pl-10"
                   required
                 />
@@ -104,21 +89,11 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span />
-              <Link to="/forgot-password" className="text-xs text-primary-600 hover:underline">
-                Forgot password?
-              </Link>
-            </div>
-
-            <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">
-              {loading ? 'Signing in…' : 'Sign In'}
+            <button type="submit" disabled={loading} className="btn-primary w-full py-2.5 bg-slate-900 hover:bg-slate-800 border-none">
+              {loading ? 'Authenticating…' : 'Authenticate'}
             </button>
           </form>
-
-          {/* Register link disabled for ERP migration */}
         </div>
-
       </div>
     </div>
   )
