@@ -20,7 +20,7 @@ export default function GroupFormation() {
   const [newEnrollment, setNewEnrollment] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const [createForm, setCreateForm] = useState({ groupName: '', memberEnrollments: '', academicYear: '' })
+  const [createForm, setCreateForm] = useState({ groupName: '', memberEnrollments: '' })
   const [projectForm, setProjectForm] = useState({ title: '', description: '', domain: '', category: '', techStack: '' })
 
   const getStatusClass = (status) => {
@@ -64,7 +64,7 @@ export default function GroupFormation() {
       const enrollments = createForm.memberEnrollments
         ? createForm.memberEnrollments.split(',').map(s => s.trim()).filter(Boolean)
         : []
-      await api.post('/groups', { groupName: createForm.groupName, memberEnrollments: enrollments, academicYear: createForm.academicYear })
+      await api.post('/groups', { groupName: createForm.groupName, memberEnrollments: enrollments })
       toast.success('Group created!')
       setShowCreate(false)
       fetchGroup()
@@ -287,11 +287,7 @@ export default function GroupFormation() {
               placeholder="0101CS21001, 0101CS21002" className="input-field" />
             <p className="text-xs text-gray-400 mt-1">Leave blank to add members later</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Academic Year</label>
-            <input value={createForm.academicYear} onChange={e => setCreateForm({ ...createForm, academicYear: e.target.value })}
-              placeholder="2024-25" className="input-field" />
-          </div>
+
           <button type="submit" disabled={submitting} className="btn-primary w-full">
             {submitting ? 'Creating…' : 'Create Group'}
           </button>
