@@ -103,7 +103,6 @@ export default function App() {
         <Route path="/admin/guide-assign" element={<GuideAssign />} />
         <Route path="/admin/marks"     element={<MarksManagement />} />
         <Route path="/admin/groups"    element={<AllGroups />} />
-        <Route path="/admin/students" element={<StudentManagement />} />
       </Route>
 
       {/* Super Admin Routes */}

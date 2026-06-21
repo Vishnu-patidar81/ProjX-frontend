@@ -59,10 +59,7 @@ export default function Sidebar({ isOpen, onClose }) {
   if (displayRole === 'super_admin') {
     links = [...superAdminLinks]
   } else if (displayRole === 'college_admin') {
-    links = [
-      ...collegeAdminLinks,
-      { to: '/admin/students', icon: FiUsers, label: 'Student Management' }
-    ]
+    links = [...collegeAdminLinks]
   } else if (displayRole === 'admin') {
     links = [...adminLinks]
   } else if (displayRole === 'teacher') {

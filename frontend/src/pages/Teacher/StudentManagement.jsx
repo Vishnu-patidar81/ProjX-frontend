@@ -320,6 +320,22 @@ export default function StudentManagement() {
     }
   }
 
+  if (!loading && sections.length === 0) {
+    return (
+      <PageLayout>
+        <div className="min-h-[50vh] flex flex-col items-center justify-center text-center px-4 py-12">
+          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-250 dark:border-amber-900/50 rounded-2xl p-8 max-w-md shadow-sm">
+            <FiAlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4 animate-bounce" />
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Access Restricted</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              You are not assigned as a Class Teacher for any section.
+            </p>
+          </div>
+        </div>
+      </PageLayout>
+    )
+  }
+
   return (
     <PageLayout>
       <div className="space-y-6">
