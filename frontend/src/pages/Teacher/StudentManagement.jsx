@@ -163,10 +163,20 @@ export default function StudentManagement() {
       return toast.error('Section selection is required')
     }
 
+    if (studentForm.personalEmail) {
+      if (!/^\S+@\S+\.\S+$/.test(studentForm.personalEmail.trim())) {
+        return toast.error('Please enter a valid personal email address.')
+      }
+    }
+
     const payload = { ...studentForm }
     // Clean up empty optional fields
     if (!payload.email) delete payload.email
-    if (!payload.personalEmail) delete payload.personalEmail
+    if (!payload.personalEmail) {
+      delete payload.personalEmail
+    } else {
+      payload.personalEmail = payload.personalEmail.trim()
+    }
 
     const promise = studentModal.mode === 'create'
       ? api.post('/students', payload)
@@ -673,10 +683,10 @@ export default function StudentManagement() {
                     </select>
                   </div>
 
-                  {/* Section Assignment */}
+                   {/* Section Assignment */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                      Class Section <span className="text-red-500">*</span>
+                      Section <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={studentForm.sectionId}
@@ -686,7 +696,7 @@ export default function StudentManagement() {
                     >
                       {sections.map(s => (
                         <option key={s._id} value={s._id}>
-                          {s.departmentId?.code || s.departmentId?.name || 'Dept'} - {s.name} ({s.academicSessionId?.name})
+                          {s.name}
                         </option>
                       ))}
                     </select>
@@ -842,7 +852,7 @@ export default function StudentManagement() {
                     >
                       {sections.map(s => (
                         <option key={s._id} value={s._id}>
-                          {s.departmentId?.code || s.departmentId?.name || 'Dept'} - {s.name} ({s.academicSessionId?.name})
+                          {s.name}
                         </option>
                       ))}
                     </select>

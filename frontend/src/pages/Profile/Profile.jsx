@@ -14,6 +14,7 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    personalEmail: '',
     phoneNumber: '',
     password: '',
     confirmPassword: '',
@@ -31,6 +32,7 @@ export default function Profile() {
         setFormData({
           name: data.user.name || '',
           email: data.user.email || '',
+          personalEmail: data.user.personalEmail || '',
           phoneNumber: data.user.phoneNumber ? data.user.phoneNumber.replace('+91', '') : '',
           password: '',
           confirmPassword: '',
@@ -53,7 +55,7 @@ export default function Profile() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!formData.name.trim()) {
       toast.error('Name is required')
@@ -64,18 +66,33 @@ export default function Profile() {
       return
     }
     
-    // Phone Number Frontend Validation
-    if (!formData.phoneNumber) {
-      toast.error('Phone number is required')
-      return
+    // Phone Number Frontend Validation (not for student)
+    if (profileData?.role !== 'student') {
+      const isFaculty = profileData?.role === 'teacher' || profileData?.role === 'guide';
+      if (!isFaculty) {
+        if (!formData.phoneNumber) {
+          toast.error('Phone number is required')
+          return
+        }
+      }
+      if (formData.phoneNumber) {
+        if (formData.phoneNumber.length !== 10) {
+          toast.error('Phone number must contain exactly 10 digits')
+          return
+        }
+        if (!/^\d{10}$/.test(formData.phoneNumber)) {
+          toast.error('Please enter a valid 10-digit mobile number.')
+          return
+        }
+      }
     }
-    if (formData.phoneNumber.length !== 10) {
-      toast.error('Phone number must contain exactly 10 digits')
-      return
-    }
-    if (!/^\d{10}$/.test(formData.phoneNumber)) {
-      toast.error('Please enter a valid 10-digit mobile number.')
-      return
+
+    // Personal Email Validation
+    if ((profileData?.role === 'student' || profileData?.role === 'teacher') && formData.personalEmail) {
+      if (!/^\S+@\S+\.\S+$/.test(formData.personalEmail.trim())) {
+        toast.error('Please enter a valid personal email address.')
+        return
+      }
     }
 
     if (formData.password) {
@@ -94,15 +111,15 @@ export default function Profile() {
       const updatePayload = {
         name: formData.name.trim(),
         email: formData.email.trim(),
-        phoneNumber: formData.phoneNumber,
+      }
+      if (profileData?.role !== 'student') {
+        updatePayload.phoneNumber = formData.phoneNumber
       }
       if (formData.password) {
         updatePayload.password = formData.password
       }
       if (profileData?.role === 'student' || profileData?.role === 'teacher') {
-        updatePayload.className = formData.className.trim();
-        updatePayload.section = formData.section;
-        updatePayload.year = formData.year;
+        updatePayload.personalEmail = formData.personalEmail.trim();
       }
       if (profileData?.role === 'guide' || profileData?.role === 'teacher') {
         updatePayload.expertiseDomains = formData.expertiseDomains
@@ -330,11 +347,10 @@ export default function Profile() {
                     />
                   </div>
                 </div>
-
-                {/* Email Address */}
-                <div>
+                         {/* Email Address (Official College Email - Read Only) */}
+                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Email Address
+                    College Email Address (Read-only)
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -345,39 +361,63 @@ export default function Profile() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="input-field pl-10"
+                      className="input-field pl-10 bg-gray-50 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
                       placeholder="Enter email address"
-                      required
+                      disabled
                     />
                   </div>
                 </div>
 
-                {/* Phone Number */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Phone Number
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                      <FiPhone className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="tel"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
-                        handleChange({ target: { name: 'phoneNumber', value: val } });
-                      }}
-                      className="input-field pl-10"
-                      placeholder="Enter 10-digit mobile number"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Department, Section, Year for Student/Teacher */}
+                {/* Personal Email Address (Optional, for Student/Teacher) */}
                 {(profileData?.role === 'student' || profileData?.role === 'teacher') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Personal Email Address <span className="text-xs text-gray-400">(Optional)</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <FiMail className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="email"
+                        name="personalEmail"
+                        value={formData.personalEmail}
+                        onChange={handleChange}
+                        className="input-field pl-10"
+                        placeholder="Enter personal email address"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Phone Number (Hidden for student, optional/editable for others) */}
+                {profileData?.role !== 'student' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Phone Number
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <FiPhone className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          handleChange({ target: { name: 'phoneNumber', value: val } });
+                        }}
+                        className="input-field pl-10"
+                        placeholder="Enter 10-digit mobile number"
+                        required={profileData?.role !== 'teacher' && profileData?.role !== 'guide'}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Department, Section, Year (Disabled/Read-only for Teacher, Hidden for Student) */}
+                {profileData?.role === 'teacher' && (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -387,10 +427,9 @@ export default function Profile() {
                         type="text"
                         name="className"
                         value={formData.className}
-                        onChange={handleChange}
-                        className="input-field"
+                        className="input-field bg-gray-50 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
                         placeholder="e.g. CSE"
-                        required
+                        disabled
                       />
                     </div>
                     <div>
@@ -398,14 +437,12 @@ export default function Profile() {
                         Section
                       </label>
                       <input
-                        type="number"
-                        min="1"
+                        type="text"
                         name="section"
                         value={formData.section}
-                        onChange={handleChange}
-                        className="input-field"
+                        className="input-field bg-gray-50 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
                         placeholder="e.g. 2"
-                        required
+                        disabled
                       />
                     </div>
                     <div>
@@ -413,15 +450,12 @@ export default function Profile() {
                         Year
                       </label>
                       <input
-                        type="number"
-                        min="1"
-                        max="4"
+                        type="text"
                         name="year"
                         value={formData.year}
-                        onChange={handleChange}
-                        className="input-field"
+                        className="input-field bg-gray-50 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
                         placeholder="e.g. 3"
-                        required
+                        disabled
                       />
                     </div>
                   </div>

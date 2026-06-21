@@ -12,12 +12,6 @@ export default function ProtectedRoute({ allowedRoles }) {
   if (user.mustChangePassword && window.location.pathname !== '/change-password') {
     return <Navigate to="/change-password" replace />
   }
-
-  // Force complete profile check for student
-  if (user.role === 'student' && !user.isProfileComplete && window.location.pathname !== '/complete-profile' && window.location.pathname !== '/change-password') {
-    return <Navigate to="/complete-profile" replace />
-  }
-
   const userRole = user.role
   const isUserGuide = user.isGuide === true
 
