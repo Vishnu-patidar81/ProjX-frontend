@@ -3,9 +3,11 @@ import PageLayout from '../../components/common/PageLayout'
 import api from '../../services/api'
 import { FiUsers, FiCheckSquare, FiUserCheck, FiAlertCircle, FiFileText } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import GroupSearch from '../../components/shared/GroupSearch'
 
 export default function TeacherDashboard() {
+  const { user } = useAuth()
   const [stats, setStats]   = useState({ groups: 0, pending: 0, approved: 0 })
   const [recentGroups, setRecentGroups] = useState([])
   const [loading, setLoading] = useState(true)
@@ -75,7 +77,7 @@ export default function TeacherDashboard() {
             </div>
 
             {/* Quick actions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               <Link to="/teacher/approvals" className="card flex items-center gap-3 hover:shadow-md transition-shadow bg-white p-4 border border-gray-100 rounded-xl">
                 <div className="p-3 bg-yellow-50 rounded-lg"><FiCheckSquare className="w-6 h-6 text-yellow-600" /></div>
                 <div>
@@ -104,6 +106,15 @@ export default function TeacherDashboard() {
                   <p className="text-xs text-gray-400">Verify guide reports</p>
                 </div>
               </Link>
+              {user?.isClassTeacher && (
+                <Link to="/teacher/students" className="card flex items-center gap-3 hover:shadow-md transition-shadow bg-white p-4 border border-gray-100 rounded-xl">
+                  <div className="p-3 bg-indigo-50 rounded-lg"><FiUsers className="w-6 h-6 text-indigo-600" /></div>
+                  <div>
+                    <p className="font-semibold text-gray-800 text-sm">Student Management</p>
+                    <p className="text-xs text-gray-400">Manage classroom students</p>
+                  </div>
+                </Link>
+              )}
             </div>
 
             {/* Active project listing */}

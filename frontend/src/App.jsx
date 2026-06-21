@@ -9,6 +9,7 @@ import ChangePassword from './pages/Auth/ChangePassword'
 import SuperAdminDashboard from './pages/Admin/SuperAdminDashboard'
 import CollegeAdminDashboard from './pages/Admin/CollegeAdminDashboard'
 import ActivateAccount from './pages/Auth/ActivateAccount'
+import CompleteProfile from './pages/Auth/CompleteProfile'
 
 // Student pages
 import StudentDashboard from './pages/Student/StudentDashboard'
@@ -31,6 +32,7 @@ import AllGroups from './pages/Admin/AllGroups'
 import TeacherDashboard from './pages/Teacher/TeacherDashboard'
 import TeacherReports from './pages/Teacher/TeacherReports'
 import Profile from './pages/Profile/Profile'
+import StudentManagement from './pages/Teacher/StudentManagement'
 
 // Announcement pages
 import StudentAnnouncements from './pages/Student/StudentAnnouncements'
@@ -82,6 +84,7 @@ export default function App() {
         <Route path="/teacher/announcements" element={<TeacherAnnouncements />} />
         <Route path="/teacher/progress" element={<ProjectProgress />} />
         <Route path="/teacher/submissions" element={<StudentSubmissions />} />
+        <Route path="/teacher/students" element={<StudentManagement />} />
       </Route>
 
       {/* Guide routes */}
@@ -100,6 +103,7 @@ export default function App() {
         <Route path="/admin/guide-assign" element={<GuideAssign />} />
         <Route path="/admin/marks"     element={<MarksManagement />} />
         <Route path="/admin/groups"    element={<AllGroups />} />
+        <Route path="/admin/students" element={<StudentManagement />} />
       </Route>
 
       {/* Super Admin Routes */}
@@ -111,6 +115,7 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/profile" element={<Profile />} />
         <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/complete-profile" element={<CompleteProfile />} />
       </Route>
 
       {/* Default redirect */}

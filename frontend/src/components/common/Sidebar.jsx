@@ -55,12 +55,26 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const displayRole = user?.role === 'teacher' && user?.isAlsoGuide ? activeMode : user?.role
 
-  const links =
-    displayRole === 'super_admin' ? superAdminLinks :
-    displayRole === 'college_admin' ? collegeAdminLinks :
-    displayRole === 'admin' ? adminLinks :
-    displayRole === 'teacher' ? teacherLinks :
-    displayRole === 'guide' ? guideLinks : studentLinks
+  let links = []
+  if (displayRole === 'super_admin') {
+    links = [...superAdminLinks]
+  } else if (displayRole === 'college_admin') {
+    links = [
+      ...collegeAdminLinks,
+      { to: '/admin/students', icon: FiUsers, label: 'Student Management' }
+    ]
+  } else if (displayRole === 'admin') {
+    links = [...adminLinks]
+  } else if (displayRole === 'teacher') {
+    links = [...teacherLinks]
+    if (user?.isClassTeacher) {
+      links.push({ to: '/teacher/students', icon: FiUsers, label: 'Student Management' })
+    }
+  } else if (displayRole === 'guide') {
+    links = [...guideLinks]
+  } else {
+    links = [...studentLinks]
+  }
 
   const handleToggle = () => {
     toggleMode()
