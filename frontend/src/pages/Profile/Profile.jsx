@@ -205,9 +205,7 @@ export default function Profile() {
                       day: 'numeric'
                     }) : '—'}
                   </p>
-                </div>
-
-                {/* Student role-specific read-only fields */}
+                </div>                 {/* Student role-specific read-only fields */}
                 {profileData?.role === 'student' && (
                   <>
                     <div>
@@ -215,14 +213,28 @@ export default function Profile() {
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{profileData?.enrollmentNumber || '—'}</p>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Department / Section</label>
+                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Department</label>
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">
-                        {profileData?.className} - {profileData?.section}
+                        {profileData?.departmentName || profileData?.departmentId?.name || profileData?.className || profileData?.department || '—'}
                       </p>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Year</label>
-                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{profileData?.year || '—'}</p>
+                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Section</label>
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">
+                        {profileData?.sectionName || profileData?.sectionId?.name || profileData?.section || '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Academic Session</label>
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">
+                        {profileData?.academicSessionName || profileData?.academicSessionId?.name || '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Academic Year</label>
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">
+                        {profileData?.academicYearName || (profileData?.academicYearId?.yearValue ? (profileData.academicYearId.yearValue === 1 ? '1st Year' : profileData.academicYearId.yearValue === 2 ? '2nd Year' : profileData.academicYearId.yearValue === 3 ? '3rd Year' : profileData.academicYearId.yearValue === 4 ? '4th Year' : `${profileData.academicYearId.yearValue}th Year`) : '') || profileData?.academicYearId?.name || (profileData?.year ? `${profileData.year} Year` : '') || '—'}
+                      </p>
                     </div>
                     <div>
                       <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">

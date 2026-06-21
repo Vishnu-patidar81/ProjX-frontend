@@ -135,7 +135,6 @@ export default function StudentManagement() {
       email: '',
       personalEmail: '',
       gender: '',
-      sectionId: sections[0]?._id || ''
     })
     setStudentModal({ open: true, mode: 'create', data: null })
   }
@@ -147,7 +146,6 @@ export default function StudentManagement() {
       email: student.email || '',
       personalEmail: student.personalEmail || '',
       gender: student.gender || '',
-      sectionId: student.sectionId?._id || student.sectionId || ''
     })
     setStudentModal({ open: true, mode: 'edit', data: student })
   }
@@ -157,10 +155,6 @@ export default function StudentManagement() {
 
     if (!studentForm.enrollmentNumber || !studentForm.name) {
       return toast.error('Enrollment Number and Student Name are required')
-    }
-
-    if (!studentForm.sectionId) {
-      return toast.error('Section selection is required')
     }
 
     if (studentForm.personalEmail) {
@@ -293,8 +287,8 @@ export default function StudentManagement() {
 
   const handleUploadImport = async (e) => {
     e.preventDefault()
-    if (!importModal.file || !importModal.targetSectionId) {
-      return toast.error('Please select both a file and a target section.')
+    if (!importModal.file) {
+      return toast.error('Please select a spreadsheet file.')
     }
 
     setLoading(true)
@@ -302,7 +296,6 @@ export default function StudentManagement() {
       const { data } = await api.post('/students/import', {
         file: importModal.file,
         fileName: importModal.fileName,
-        sectionId: importModal.targetSectionId
       })
 
       toast.success(data.message || 'Bulk import completed successfully!')
@@ -682,25 +675,6 @@ export default function StudentManagement() {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-
-                   {/* Section Assignment */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                      Section <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={studentForm.sectionId}
-                      onChange={(e) => setStudentForm({ ...studentForm, sectionId: e.target.value })}
-                      className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-hidden w-full focus:ring-2 focus:ring-primary-500"
-                      required
-                    >
-                      {sections.map(s => (
-                        <option key={s._id} value={s._id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
@@ -839,25 +813,6 @@ export default function StudentManagement() {
                 </div>
 
                 <form onSubmit={handleUploadImport} className="space-y-4">
-                  {/* Select Target Section */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                      Target Section <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={importModal.targetSectionId}
-                      onChange={(e) => setImportModal({ ...importModal, targetSectionId: e.target.value })}
-                      className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-hidden w-full focus:ring-2 focus:ring-primary-500"
-                      required
-                    >
-                      {sections.map(s => (
-                        <option key={s._id} value={s._id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   {/* File Upload */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
