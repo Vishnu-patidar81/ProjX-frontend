@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 
 // Auth pages
@@ -48,6 +49,18 @@ import ProtectedRoute from './components/common/ProtectedRoute'
 
 export default function App() {
   const { user, loading, activeMode } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toUpperCase() === 'A') {
+        e.preventDefault()
+        navigate('/system/login')
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [navigate])
 
   if (loading) {
     return (

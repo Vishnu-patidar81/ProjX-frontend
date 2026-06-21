@@ -44,6 +44,18 @@ export default function Navbar({ onToggleSidebar }) {
     navigate('/login')
   }
 
+  const [logoClicks, setLogoClicks] = useState([])
+
+  const handleLogoClick = (e) => {
+    const now = Date.now()
+    const activeClicks = [...logoClicks.filter(t => now - t < 3000), now]
+    setLogoClicks(activeClicks)
+    if (activeClicks.length >= 5) {
+      e.preventDefault()
+      navigate('/system/login')
+    }
+  }
+
   const displayRole = user?.role === 'teacher' && user?.isAlsoGuide ? activeMode : user?.role
 
   const roleLabel = displayRole === 'super_admin' ? 'Super Admin'
@@ -73,7 +85,7 @@ export default function Navbar({ onToggleSidebar }) {
               </button>
             )}
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">PX</span>
               </div>

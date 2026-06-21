@@ -12,6 +12,18 @@ export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
+  const [logoClicks, setLogoClicks] = useState([])
+
+  const handleLogoClick = (e) => {
+    const now = Date.now()
+    const activeClicks = [...logoClicks.filter(t => now - t < 3000), now]
+    setLogoClicks(activeClicks)
+    if (activeClicks.length >= 5) {
+      e.preventDefault()
+      navigate('/system/login')
+    }
+  }
+
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleSubmit = async (e) => {
@@ -49,7 +61,7 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-700 to-accent flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 cursor-pointer select-none" onClick={handleLogoClick}>
           <div className="inline-flex items-center justify-center w-14 h-14 bg-white rounded-2xl shadow-lg mb-4">
             <span className="text-primary-700 font-bold text-xl">PX</span>
           </div>
