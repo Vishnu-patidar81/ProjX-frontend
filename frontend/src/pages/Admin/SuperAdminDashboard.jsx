@@ -1,16 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
 import {
   FiShield, FiLogOut, FiPlus, FiEdit, FiTrash2,
   FiSend, FiRefreshCw, FiGrid, FiUsers, FiSettings,
   FiActivity, FiCopy, FiCheck, FiX, FiInfo, FiEye,
-  FiAlertTriangle, FiCheckCircle, FiDollarSign, FiClock
+  FiAlertTriangle, FiCheckCircle, FiDollarSign, FiClock,
+  FiSun, FiMoon, FiMenu, FiChevronLeft, FiChevronRight,
+  FiBriefcase, FiMonitor, FiUser
 } from 'react-icons/fi'
 
 export default function SuperAdminDashboard() {
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
   const [colleges, setColleges] = useState([])
   const [admins, setAdmins] = useState([])
@@ -533,7 +539,7 @@ export default function SuperAdminDashboard() {
   const expiringSoonColleges = colleges.filter(c => {
     const days = getRemainingDays(c.subscription?.expiresAt)
     if (days === 'Expired') return true
-    const numericDays = parseInt(days)
+  const numericDays = parseInt(days)
     return !isNaN(numericDays) && numericDays <= 30
   })
 
@@ -541,136 +547,184 @@ export default function SuperAdminDashboard() {
   const recentLogs = [...auditLogs].slice(0, 8)
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans antialiased text-gray-800">
-      {/* SaaS Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B1120] flex flex-col font-sans antialiased text-gray-800 dark:text-gray-100 transition-colors duration-200">
+      {/* Top Navigation Bar */}
+      <header className="bg-white dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30 transition-colors duration-200">
         <div className="flex items-center gap-3">
-          <div className="bg-slate-900 text-white p-2.5 rounded-xl shadow-md">
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="bg-blue-600 dark:bg-[#2563EB] text-white p-2.5 rounded-xl shadow-md hover:opacity-90 transition-opacity"
+            aria-label="Toggle Sidebar"
+          >
             <FiShield className="w-5 h-5 text-emerald-400" />
-          </div>
+          </button>
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-slate-950">ProjX SaaS Platform Manager</h1>
-            <p className="text-xs text-gray-400 font-medium">SaaS Level Super Administration</p>
+            <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">ProjX System Portal</h1>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Platform Management</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-4">
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-gray-700">{user?.name || 'SaaS Admin'}</p>
-            <p className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full inline-block font-bold mt-0.5">PLATFORM ADMIN</p>
+          {/* Platform Status */}
+          <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 rounded-full">
+            <span className="h-2 w-2 rounded-full bg-[#10B981] animate-pulse" />
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Platform: Active</span>
           </div>
+
+          {/* Theme Toggle */}
           <button
-            onClick={logout}
-            className="flex items-center gap-2 text-xs font-semibold text-red-600 hover:bg-red-50 border border-red-100 hover:border-red-200 px-3.5 py-2 rounded-xl transition-all"
+            onClick={toggleTheme}
+            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            aria-label="Toggle Theme"
           >
-            <FiLogOut className="w-3.5 h-3.5" />
-            Logout
+            {theme === 'dark' ? <FiSun className="w-4 h-4 text-yellow-500" /> : <FiMoon className="w-4 h-4" />}
           </button>
+
+          {/* Profile Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              className="flex items-center gap-2 hover:opacity-85 transition-opacity"
+            >
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 rounded-full flex items-center justify-center">
+                <FiUser className="w-4 h-4 text-[#2563EB]" />
+              </div>
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 hidden sm:block">
+                Super Admin
+              </span>
+            </button>
+            {profileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl py-2 z-40 animate-fadeIn">
+                <div className="px-4 py-2 border-b border-gray-155 dark:border-gray-800">
+                  <p className="text-[10px] text-gray-400">Signed in as</p>
+                  <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">{user?.email || 'superadmin@projx.com'}</p>
+                </div>
+                <button
+                  onClick={logout}
+                  className="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2"
+                >
+                  <FiLogOut className="w-3.5 h-3.5" />
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Main SaaS Administration Area */}
       <div className="flex flex-1 flex-col lg:flex-row">
-        {/* Minimal SaaS Navigation Sidebar */}
-        <aside className="w-full lg:w-64 bg-white border-r border-gray-200 p-4 flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible shrink-0">
+        {/* Navigation Sidebar */}
+        <aside className={`bg-white dark:bg-[#0F172A] border-r border-gray-200 dark:border-gray-700 p-4 flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}`}>
           <button
             onClick={() => { setActiveTab('overview'); setSelectedCollege(null); }}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all whitespace-nowrap lg:w-full
-              ${activeTab === 'overview' ? 'bg-slate-900 text-white shadow-md' : 'text-gray-600 hover:bg-slate-50'}`}
+              ${activeTab === 'overview' ? 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
           >
             <FiGrid className="w-4 h-4 shrink-0" />
-            Dashboard
+            {!sidebarCollapsed && <span>Dashboard</span>}
           </button>
           <button
             onClick={() => { setActiveTab('colleges'); setSelectedCollege(null); }}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all whitespace-nowrap lg:w-full
-              ${activeTab === 'colleges' ? 'bg-slate-900 text-white shadow-md' : 'text-gray-600 hover:bg-slate-50'}`}
+              ${activeTab === 'colleges' ? 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
           >
-            <FiPlus className="w-4 h-4 shrink-0" />
-            Colleges
+            <FiMonitor className="w-4 h-4 shrink-0" />
+            {!sidebarCollapsed && <span>Colleges</span>}
           </button>
           <button
             onClick={() => { setActiveTab('admins'); setSelectedCollege(null); }}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all whitespace-nowrap lg:w-full
-              ${activeTab === 'admins' ? 'bg-slate-900 text-white shadow-md' : 'text-gray-600 hover:bg-slate-50'}`}
+              ${activeTab === 'admins' ? 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
           >
             <FiUsers className="w-4 h-4 shrink-0" />
-            College Admins
+            {!sidebarCollapsed && <span>College Admins</span>}
           </button>
           <button
             onClick={() => { setActiveTab('subscriptions'); setSelectedCollege(null); }}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all whitespace-nowrap lg:w-full
-              ${activeTab === 'subscriptions' ? 'bg-slate-900 text-white shadow-md' : 'text-gray-600 hover:bg-slate-50'}`}
+              ${activeTab === 'subscriptions' ? 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
           >
             <FiDollarSign className="w-4 h-4 shrink-0" />
-            Subscription Management
+            {!sidebarCollapsed && <span>Subscription Management</span>}
           </button>
           <button
             onClick={() => { setActiveTab('logs'); setSelectedCollege(null); }}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all whitespace-nowrap lg:w-full
-              ${activeTab === 'logs' ? 'bg-slate-900 text-white shadow-md' : 'text-gray-600 hover:bg-slate-50'}`}
+              ${activeTab === 'logs' ? 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
           >
             <FiActivity className="w-4 h-4 shrink-0" />
-            Audit Logs
+            {!sidebarCollapsed && <span>Audit Logs</span>}
           </button>
           <button
             onClick={() => { setActiveTab('settings'); setSelectedCollege(null); }}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all whitespace-nowrap lg:w-full
-              ${activeTab === 'settings' ? 'bg-slate-900 text-white shadow-md' : 'text-gray-600 hover:bg-slate-50'}`}
+              ${activeTab === 'settings' ? 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
           >
             <FiSettings className="w-4 h-4 shrink-0" />
-            System Settings
+            {!sidebarCollapsed && <span>System Settings</span>}
+          </button>
+
+          <div className="hidden lg:block lg:flex-1" />
+
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-red-650 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all whitespace-nowrap lg:w-full"
+          >
+            <FiLogOut className="w-4 h-4 shrink-0" />
+            {!sidebarCollapsed && <span>Logout</span>}
           </button>
         </aside>
 
         {/* Action Panel Container */}
-        <main className="flex-1 p-6 lg:p-8 overflow-y-auto max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full mx-auto">
           
           {/* TAB 1: DASHBOARD OVERVIEW */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* SaaS Dashboard Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white dark:bg-[#111827] border border-gray-255 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Total Colleges</span>
                   <div className="flex items-baseline gap-2 mt-1">
-                    <p className="text-3xl font-bold text-slate-900">{stats.totalColleges}</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalColleges}</p>
                   </div>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500 block">Active Colleges</span>
+                <div className="bg-white dark:bg-[#111827] border border-gray-255 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#10B981] block">Active Colleges</span>
                   <div className="flex items-baseline gap-2 mt-1">
-                    <p className="text-3xl font-bold text-emerald-600">{stats.activeColleges}</p>
+                    <p className="text-3xl font-bold text-[#10B981]">{stats.activeColleges}</p>
                   </div>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-500 block">Inactive Colleges</span>
+                <div className="bg-white dark:bg-[#111827] border border-gray-255 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#EF4444] block">Inactive Colleges</span>
                   <div className="flex items-baseline gap-2 mt-1">
-                    <p className="text-3xl font-bold text-red-600">{stats.inactiveColleges}</p>
+                    <p className="text-3xl font-bold text-[#EF4444]">{stats.inactiveColleges}</p>
                   </div>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 block">Trial Colleges</span>
+                <div className="bg-white dark:bg-[#111827] border border-gray-255 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 dark:text-indigo-400 block">Trial Colleges</span>
                   <div className="flex items-baseline gap-2 mt-1">
-                    <p className="text-3xl font-bold text-indigo-600">{stats.trialColleges}</p>
+                    <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{stats.trialColleges}</p>
                   </div>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 block">Expired Subscriptions</span>
+                <div className="bg-white dark:bg-[#111827] border border-gray-255 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-400 block">Expired Subscriptions</span>
                   <div className="flex items-baseline gap-2 mt-1">
-                    <p className="text-3xl font-bold text-rose-600">{stats.expiredSubscriptions}</p>
+                    <p className="text-3xl font-bold text-rose-600 dark:text-rose-400">{stats.expiredSubscriptions}</p>
                   </div>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 block">Pending Renewals</span>
+                <div className="bg-white dark:bg-[#111827] border border-gray-255 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#F59E0B] block">Pending Renewals</span>
                   <div className="flex items-baseline gap-2 mt-1">
-                    <p className="text-3xl font-bold text-amber-600">{stats.pendingRenewals}</p>
+                    <p className="text-3xl font-bold text-[#F59E0B]">{stats.pendingRenewals}</p>
                   </div>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Total College Admins</span>
+                <div className="bg-white dark:bg-[#111827] border border-gray-255 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">Total College Admins</span>
                   <div className="flex items-baseline gap-2 mt-1">
-                    <p className="text-3xl font-bold text-slate-800">{stats.totalCollegeAdmins}</p>
+                    <p className="text-3xl font-bold text-slate-800 dark:text-gray-200">{stats.totalCollegeAdmins}</p>
                   </div>
                 </div>
               </div>
@@ -679,34 +733,34 @@ export default function SuperAdminDashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {/* Subscription Expiring Soon Table */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col">
+                <div className="bg-white dark:bg-[#111827] border border-gray-250 dark:border-gray-700 rounded-2xl p-5 shadow-sm flex flex-col">
                   <div className="flex items-center gap-2 mb-3">
                     <FiAlertTriangle className="text-amber-500 w-4 h-4" />
-                    <h3 className="text-sm font-bold text-slate-800">Subscriptions Expiring Soon (or Expired)</h3>
+                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-250">Subscriptions Expiring Soon (or Expired)</h3>
                   </div>
                   <div className="overflow-x-auto flex-1">
                     <table className="w-full text-xs text-left border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-400 font-bold uppercase">
+                        <tr className="bg-gray-50 dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 font-bold uppercase">
                           <th className="py-2.5 px-3">College</th>
                           <th className="py-2.5 px-3">Plan</th>
                           <th className="py-2.5 px-3">Expiry Date</th>
                           <th className="py-2.5 px-3 text-right">Remaining</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100 text-gray-700">
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
                         {expiringSoonColleges.length === 0 ? (
                           <tr>
-                            <td colSpan="4" className="py-4 text-center text-gray-400">All subscriptions are up-to-date.</td>
+                            <td colSpan="4" className="py-4 text-center text-gray-400 dark:text-gray-550">All subscriptions are up-to-date.</td>
                           </tr>
                         ) : (
                           expiringSoonColleges.map(c => (
-                            <tr key={c._id} className="hover:bg-gray-50/55">
-                              <td className="py-2 px-3 font-semibold text-slate-900">{c.name}</td>
+                            <tr key={c._id} className="hover:bg-gray-50/55 dark:hover:bg-gray-800/40">
+                              <td className="py-2 px-3 font-semibold text-gray-900 dark:text-white">{c.name}</td>
                               <td className="py-2 px-3">{c.subscription?.planId?.name || 'N/A'}</td>
-                              <td className="py-2 px-3 text-gray-500">{new Date(c.subscription?.expiresAt).toLocaleDateString()}</td>
+                              <td className="py-2 px-3 text-gray-500 dark:text-gray-450">{new Date(c.subscription?.expiresAt).toLocaleDateString()}</td>
                               <td className="py-2 px-3 text-right font-bold">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] ${getRemainingDays(c.subscription?.expiresAt) === 'Expired' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] ${getRemainingDays(c.subscription?.expiresAt) === 'Expired' ? 'bg-red-50 dark:bg-red-950/20 text-[#EF4444]' : 'bg-amber-50 dark:bg-amber-950/20 text-[#F59E0B]'}`}>
                                   {getRemainingDays(c.subscription?.expiresAt)}
                                 </span>
                               </td>
@@ -719,34 +773,34 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 {/* Recent Colleges Table */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col">
+                <div className="bg-white dark:bg-[#111827] border border-gray-250 dark:border-gray-700 rounded-2xl p-5 shadow-sm flex flex-col">
                   <div className="flex items-center gap-2 mb-3">
-                    <FiPlus className="text-slate-800 w-4 h-4" />
-                    <h3 className="text-sm font-bold text-slate-800">Recently Registered Colleges</h3>
+                    <FiPlus className="text-gray-800 dark:text-gray-200 w-4 h-4" />
+                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-250">Recently Registered Colleges</h3>
                   </div>
                   <div className="overflow-x-auto flex-1">
                     <table className="w-full text-xs text-left border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-400 font-bold uppercase">
+                        <tr className="bg-gray-50 dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-550 font-bold uppercase">
                           <th className="py-2.5 px-3">College Name</th>
                           <th className="py-2.5 px-3">Code</th>
                           <th className="py-2.5 px-3">Created</th>
                           <th className="py-2.5 px-3 text-right">Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100 text-gray-700">
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
                         {recentColleges.length === 0 ? (
                           <tr>
-                            <td colSpan="4" className="py-4 text-center text-gray-400">No colleges registered.</td>
+                            <td colSpan="4" className="py-4 text-center text-gray-400 dark:text-gray-550">No colleges registered.</td>
                           </tr>
                         ) : (
                           recentColleges.map(c => (
-                            <tr key={c._id} className="hover:bg-gray-50/55">
-                              <td className="py-2 px-3 font-semibold text-slate-900">{c.name}</td>
+                            <tr key={c._id} className="hover:bg-gray-50/55 dark:hover:bg-gray-800/40">
+                              <td className="py-2 px-3 font-semibold text-gray-900 dark:text-white">{c.name}</td>
                               <td className="py-2 px-3">{c.code}</td>
-                              <td className="py-2 px-3 text-gray-500">{new Date(c.createdAt).toLocaleDateString()}</td>
+                              <td className="py-2 px-3 text-gray-500 dark:text-gray-450">{new Date(c.createdAt).toLocaleDateString()}</td>
                               <td className="py-2 px-3 text-right">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${c.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${c.status === 'Active' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-[#10B981]' : 'bg-red-50 dark:bg-red-950/20 text-[#EF4444]'}`}>
                                   {c.status}
                                 </span>
                               </td>
@@ -759,33 +813,33 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 {/* Recent System Audit Logs */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm lg:col-span-2">
+                <div className="bg-white dark:bg-[#111827] border border-gray-250 dark:border-gray-700 rounded-2xl p-5 shadow-sm lg:col-span-2">
                   <div className="flex items-center gap-2 mb-3">
-                    <FiActivity className="text-slate-800 w-4 h-4" />
-                    <h3 className="text-sm font-bold text-slate-800">Recent Administrative Logs</h3>
+                    <FiActivity className="text-gray-800 dark:text-gray-200 w-4 h-4" />
+                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-250">Recent Administrative Logs</h3>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs text-left border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-400 font-bold uppercase">
+                        <tr className="bg-gray-50 dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-550 font-bold uppercase">
                           <th className="py-2.5 px-3">Action</th>
                           <th className="py-2.5 px-3">Details</th>
                           <th className="py-2.5 px-3">Actor</th>
                           <th className="py-2.5 px-3 text-right">Timestamp</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100 text-gray-600">
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
                         {recentLogs.length === 0 ? (
                           <tr>
-                            <td colSpan="4" className="py-4 text-center text-gray-400">No recent logs recorded.</td>
+                            <td colSpan="4" className="py-4 text-center text-gray-400 dark:text-gray-550">No recent logs recorded.</td>
                           </tr>
                         ) : (
                           recentLogs.map(log => (
-                            <tr key={log._id || Math.random()} className="hover:bg-gray-50/50">
-                              <td className="py-2 px-3 font-semibold text-slate-900">{log.action}</td>
-                              <td className="py-2 px-3 text-gray-500">{log.details}</td>
-                              <td className="py-2 px-3">{log.actor?.email || 'System'}</td>
-                              <td className="py-2 px-3 text-right text-[10px] text-gray-400">{new Date(log.timestamp).toLocaleString()}</td>
+                            <tr key={log._id || Math.random()} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
+                              <td className="py-2 px-3 font-semibold text-gray-900 dark:text-white">{log.action}</td>
+                              <td className="py-2 px-3 text-gray-500 dark:text-gray-400">{log.details}</td>
+                              <td className="py-2 px-3 font-mono">{log.actor?.email || 'System'}</td>
+                              <td className="py-2 px-3 text-right text-[10px] text-gray-400 font-mono">{new Date(log.timestamp).toLocaleString()}</td>
                             </tr>
                           ))
                         )}
@@ -803,12 +857,12 @@ export default function SuperAdminDashboard() {
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Colleges Management</h2>
-                  <p className="text-xs text-gray-500">Add, edit, view detail profile and archive institution accounts</p>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">Colleges Management</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Add, edit, view detail profile and archive institution accounts</p>
                 </div>
                 <button
                   onClick={() => handleOpenCollegeModal('create')}
-                  className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-sm transition-all"
+                  className="bg-blue-600 dark:bg-[#2563EB] hover:bg-blue-700 dark:hover:bg-[#1D4ED8] text-white font-semibold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-sm transition-all border-none"
                 >
                   <FiPlus className="w-4 h-4" />
                   Add College
@@ -816,7 +870,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Filters */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center">
+              <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center">
                 <div className="w-full sm:flex-1 relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                     <FiShield className="w-4 h-4" />
@@ -826,14 +880,14 @@ export default function SuperAdminDashboard() {
                     placeholder="Search by college name or code..."
                     value={collegeSearch}
                     onChange={(e) => setCollegeSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
+                    className="w-full pl-9 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div className="w-full sm:w-48">
                   <select
                     value={collegeStatusFilter}
                     onChange={(e) => setCollegeStatusFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-slate-400 bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 cursor-pointer"
                   >
                     <option value="All">All Statuses</option>
                     <option value="Active">Active</option>
@@ -844,11 +898,11 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Table */}
-              <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+              <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left border-collapse">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase">
+                      <tr className="bg-gray-50 dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-bold uppercase">
                         <th className="p-4">Code</th>
                         <th className="p-4">Name</th>
                         <th className="p-4">Official Email</th>
@@ -858,33 +912,33 @@ export default function SuperAdminDashboard() {
                         <th className="p-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
                       {filteredColleges.length === 0 ? (
                         <tr>
                           <td colSpan="7" className="p-8 text-center text-gray-400">No colleges match criteria.</td>
                         </tr>
                       ) : (
                         filteredColleges.map((c) => (
-                          <tr key={c._id} className="hover:bg-gray-50/50">
-                            <td className="p-4 font-bold text-slate-900">{c.code}</td>
-                            <td className="p-4 font-semibold text-slate-800">{c.name}</td>
-                            <td className="p-4 text-gray-600">{c.email}</td>
-                            <td className="p-4 text-gray-600">{c.phone}</td>
-                            <td className="p-4 font-medium text-slate-700">
+                          <tr key={c._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                            <td className="p-4 font-bold text-gray-900 dark:text-white">{c.code}</td>
+                            <td className="p-4 font-semibold text-gray-800 dark:text-gray-200">{c.name}</td>
+                            <td className="p-4 font-mono">{c.email}</td>
+                            <td className="p-4">{c.phone}</td>
+                            <td className="p-4 font-medium text-gray-750 dark:text-gray-400">
                               {c.subscription?.planId?.name || 'No Plan'} ({getRemainingDays(c.subscription?.expiresAt)})
                             </td>
                             <td className="p-4">
-                              <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold
-                                ${c.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                                  : c.status === 'Deactivated' ? 'bg-red-50 text-red-600 border border-red-100'
-                                  : 'bg-gray-50 text-gray-600 border border-gray-100'}`}>
+                              <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold border text-[10px]
+                                ${c.status === 'Active' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-[#10B981] border-emerald-100 dark:border-emerald-900/50'
+                                  : c.status === 'Deactivated' ? 'bg-red-50 dark:bg-red-950/20 text-[#EF4444] border-red-100 dark:border-red-900/50'
+                                  : 'bg-gray-50 dark:bg-gray-800 text-gray-650 dark:text-gray-450 border-gray-100 dark:border-gray-700'}`}>
                                 {c.status === 'Deactivated' ? 'Archived' : c.status}
                               </span>
                             </td>
                             <td className="p-4 text-right space-x-2 whitespace-nowrap">
                               <button
                                 onClick={() => setSelectedCollege(c)}
-                                className="text-slate-500 hover:text-slate-900 border border-gray-100 hover:border-gray-300 bg-gray-50 px-2 py-1 rounded-lg font-semibold inline-flex items-center gap-1.5"
+                                className="text-gray-600 dark:text-gray-300 hover:text-[#2563EB] border border-gray-200 dark:border-gray-750 bg-gray-55 dark:bg-gray-800 px-2.5 py-1 rounded-lg font-semibold inline-flex items-center gap-1.5"
                                 title="View Details"
                               >
                                 <FiEye className="w-3 h-3" />
@@ -892,7 +946,7 @@ export default function SuperAdminDashboard() {
                               </button>
                               <button
                                 onClick={() => handleOpenCollegeModal('edit', c)}
-                                className="text-slate-600 hover:text-slate-800 border border-gray-100 hover:border-gray-300 bg-gray-50 p-1.5 rounded-lg inline-flex"
+                                className="text-gray-600 dark:text-gray-300 hover:text-[#2563EB] border border-gray-200 dark:border-gray-750 bg-gray-55 dark:bg-gray-800 p-1.5 rounded-lg inline-flex"
                                 title="Edit College"
                               >
                                 <FiEdit className="w-3.5 h-3.5" />
@@ -900,7 +954,7 @@ export default function SuperAdminDashboard() {
                               {c.status === 'Active' ? (
                                 <button
                                   onClick={() => handleSuspendSubscription(c._id)}
-                                  className="text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-100 px-2 py-1 rounded-lg font-semibold"
+                                  className="text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-200 dark:border-red-900/50 px-2.5 py-1 rounded-lg font-semibold"
                                 >
                                   Suspend
                                 </button>
@@ -908,7 +962,7 @@ export default function SuperAdminDashboard() {
                                 c.status !== 'Deactivated' && (
                                   <button
                                     onClick={() => handleActivateSubscription(c._id)}
-                                    className="text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-lg font-semibold"
+                                    className="text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 px-2.5 py-1 rounded-lg font-semibold"
                                   >
                                     Activate
                                   </button>
@@ -917,7 +971,7 @@ export default function SuperAdminDashboard() {
                               {c.status !== 'Deactivated' && (
                                 <button
                                   onClick={() => handleArchiveCollege(c._id)}
-                                  className="text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-rose-100 px-2 py-1 rounded-lg font-semibold"
+                                  className="text-rose-600 hover:text-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 px-2.5 py-1 rounded-lg font-semibold"
                                   title="Archive College"
                                 >
                                   Archive
@@ -940,118 +994,118 @@ export default function SuperAdminDashboard() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSelectedCollege(null)}
-                  className="text-slate-500 hover:text-slate-900 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-xl font-semibold text-xs flex items-center gap-1.5"
+                  className="text-gray-550 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#111827] hover:bg-gray-50 dark:hover:bg-gray-800 px-3.5 py-1.5 rounded-xl font-semibold text-xs flex items-center gap-1.5"
                 >
                   <FiX className="w-4 h-4" />
                   Back to Directory
                 </button>
-                <span className="text-gray-300">/</span>
-                <span className="text-xs font-bold text-gray-500 uppercase">{selectedCollege.name} Profile</span>
+                <span className="text-gray-300 dark:text-gray-600">/</span>
+                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">{selectedCollege.name} Profile</span>
               </div>
 
               {/* Info panel */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+              <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">{selectedCollege.name} Details</h3>
-                  <p className="text-xs text-gray-400">Institutional record index</p>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{selectedCollege.name} Details</h3>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Institutional record index</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-xs border-t border-b border-gray-100 py-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-xs border-t border-b border-gray-100 dark:border-gray-800 py-6">
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">College Code</span>
-                    <span className="text-sm font-bold text-slate-800">{selectedCollege.code}</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">College Code</span>
+                    <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{selectedCollege.code}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Slug</span>
-                    <span className="text-sm text-slate-700 font-mono">{selectedCollege.slug}</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Slug</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300 font-mono">{selectedCollege.slug}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Official Email</span>
-                    <span className="text-sm text-slate-700">{selectedCollege.email}</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Official Email</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300 font-mono">{selectedCollege.email}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Phone Number</span>
-                    <span className="text-sm text-slate-700">{selectedCollege.phone}</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Phone Number</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{selectedCollege.phone}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Website</span>
-                    <a href={`http://${selectedCollege.website}`} target="_blank" rel="noreferrer" className="text-sm text-indigo-600 hover:underline">{selectedCollege.website || 'N/A'}</a>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Website</span>
+                    <a href={`http://${selectedCollege.website}`} target="_blank" rel="noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">{selectedCollege.website || 'N/A'}</a>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">College Status</span>
-                    <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold mt-1 text-[10px]
-                      ${selectedCollege.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                        : selectedCollege.status === 'Deactivated' ? 'bg-red-50 text-red-600 border border-red-100'
-                        : 'bg-gray-50 text-gray-600 border border-gray-100'}`}>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">College Status</span>
+                    <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold mt-1 text-[10px] border
+                      ${selectedCollege.status === 'Active' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-[#10B981] border-emerald-100 dark:border-emerald-900/50'
+                        : selectedCollege.status === 'Deactivated' ? 'bg-red-50 dark:bg-red-950/20 text-[#EF4444] border-red-100 dark:border-red-900/50'
+                        : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-100 dark:border-gray-700'}`}>
                       {selectedCollege.status === 'Deactivated' ? 'Archived' : selectedCollege.status}
                     </span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Subscription Plan</span>
-                    <span className="text-sm font-semibold text-slate-800">{selectedCollege.subscription?.planId?.name || 'N/A'}</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Subscription Plan</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{selectedCollege.subscription?.planId?.name || 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Expiry Date</span>
-                    <span className="text-sm text-slate-700">{new Date(selectedCollege.subscription?.expiresAt).toLocaleString()} ({getRemainingDays(selectedCollege.subscription?.expiresAt)})</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Expiry Date</span>
+                    <span className="text-sm text-gray-750 dark:text-gray-305">{new Date(selectedCollege.subscription?.expiresAt).toLocaleString()} ({getRemainingDays(selectedCollege.subscription?.expiresAt)})</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Assigned Admin</span>
-                    <span className="text-sm font-semibold text-slate-800">{selectedCollege.adminUser ? `${selectedCollege.adminUser.name} (${selectedCollege.adminUser.email})` : 'No Admin Assigned'}</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Assigned Admin</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{selectedCollege.adminUser ? `${selectedCollege.adminUser.name} (${selectedCollege.adminUser.email})` : 'No Admin Assigned'}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Created Date</span>
-                    <span className="text-sm text-gray-500">{new Date(selectedCollege.createdAt).toLocaleString()}</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Created Date</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{new Date(selectedCollege.createdAt).toLocaleString()}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Updated Date</span>
-                    <span className="text-sm text-gray-500">{new Date(selectedCollege.updatedAt).toLocaleString()}</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Updated Date</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{new Date(selectedCollege.updatedAt).toLocaleString()}</span>
                   </div>
                   <div className="md:col-span-2">
-                    <span className="font-bold text-gray-400 uppercase tracking-wider block mb-1">Physical Address</span>
-                    <span className="text-sm text-slate-700">{selectedCollege.address}</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Physical Address</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{selectedCollege.address}</span>
                   </div>
                 </div>
 
                 {/* History Timeline */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
                     <FiClock className="w-4 h-4 text-gray-400" />
                     Subscription History Timeline
                   </h4>
-                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-400 font-bold uppercase">
+                        <tr className="bg-gray-50 dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-550 font-bold uppercase">
                           <th className="p-3">Plan</th>
-                          <th className="p-3">ActionPerformed</th>
+                          <th className="p-3">Action</th>
                           <th className="p-3">Expiry Date</th>
                           <th className="p-3">Status</th>
                           <th className="p-3">Payment</th>
                           <th className="p-3 text-right">Timestamp</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100 text-gray-700">
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
                         {!selectedCollege.subscriptionHistory || selectedCollege.subscriptionHistory.length === 0 ? (
                           <tr>
-                            <td colSpan="6" className="p-4 text-center text-gray-400">No logs on subscription adjustments.</td>
+                            <td colSpan="6" className="p-4 text-center text-gray-400 dark:text-gray-550">No logs on subscription adjustments.</td>
                           </tr>
                         ) : (
                           selectedCollege.subscriptionHistory.map((h, i) => (
-                            <tr key={i} className="hover:bg-gray-50/50">
-                              <td className="p-3 font-semibold text-slate-800">{h.planId?.name || 'Same Plan'}</td>
+                            <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                              <td className="p-3 font-semibold text-gray-800 dark:text-gray-200">{h.planId?.name || 'Same Plan'}</td>
                               <td className="p-3 capitalize">{h.action}</td>
-                              <td className="p-3 text-gray-500">{new Date(h.expiresAt).toLocaleDateString()}</td>
+                              <td className="p-3 text-gray-555 dark:text-gray-400">{new Date(h.expiresAt).toLocaleDateString()}</td>
                               <td className="p-3">
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${h.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${h.status === 'active' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-[#10B981]' : 'bg-rose-50 dark:bg-rose-950/20 text-[#EF4444]'}`}>
                                   {h.status}
                                 </span>
                               </td>
                               <td className="p-3">
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${h.paymentStatus === 'Paid' ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'}`}>
+                                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${h.paymentStatus === 'Paid' ? 'bg-blue-50 dark:bg-blue-950/20 text-[#2563EB]' : 'bg-red-50 dark:bg-red-950/20 text-[#EF4444]'}`}>
                                   {h.paymentStatus || 'Paid'}
                                 </span>
                               </td>
-                              <td className="p-3 text-right text-gray-400 text-[10px]">{new Date(h.timestamp).toLocaleString()}</td>
+                              <td className="p-3 text-right text-gray-400 dark:text-gray-550 text-[10px] font-mono">{new Date(h.timestamp).toLocaleString()}</td>
                             </tr>
                           ))
                         )}
@@ -1068,12 +1122,12 @@ export default function SuperAdminDashboard() {
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">College Admins Directory</h2>
-                  <p className="text-xs text-gray-500">Invite, configure settings, reset passwords, transfer, and suspend admins</p>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">College Admins Directory</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Invite, configure settings, reset passwords, transfer, and suspend admins</p>
                 </div>
                 <button
                   onClick={() => handleOpenAdminModal('create')}
-                  className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-sm transition-all"
+                  className="bg-blue-600 dark:bg-[#2563EB] hover:bg-blue-700 dark:hover:bg-[#1D4ED8] text-white font-semibold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-sm transition-all border-none"
                 >
                   <FiSend className="w-4 h-4" />
                   Invite Admin
@@ -1082,20 +1136,20 @@ export default function SuperAdminDashboard() {
 
               {/* Temporary password alert banner */}
               {tempPasswordAlert && (
-                <div className="bg-amber-50 border border-amber-200 text-amber-900 px-5 py-4 rounded-2xl flex items-center justify-between gap-4 shadow-sm">
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200 px-5 py-4 rounded-2xl flex items-center justify-between gap-4 shadow-sm animate-fadeIn">
                   <div className="flex items-center gap-3">
-                    <FiAlertTriangle className="text-amber-600 w-5 h-5 shrink-0" />
+                    <FiAlertTriangle className="text-amber-600 dark:text-amber-400 w-5 h-5 shrink-0" />
                     <div>
                       <p className="font-bold text-sm">Temporary Password Generated</p>
-                      <p className="text-xs text-amber-700 mt-0.5">Please copy this password now. It will not be shown again: <strong className="bg-white border border-amber-300 px-2 py-1 rounded select-all font-mono tracking-wider ml-1">{tempPasswordAlert}</strong></p>
+                      <p className="text-xs text-amber-700 dark:text-amber-450 mt-0.5">Please copy this password now. It will not be shown again: <strong className="bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-800 px-2 py-1 rounded select-all font-mono tracking-wider ml-1 text-slate-800 dark:text-white">{tempPasswordAlert}</strong></p>
                     </div>
                   </div>
-                  <button onClick={() => setTempPasswordAlert(null)} className="text-amber-500 hover:text-amber-800 font-bold text-sm px-2 py-1 border border-amber-200 hover:border-amber-300 rounded-lg">Dismiss</button>
+                  <button onClick={() => setTempPasswordAlert(null)} className="text-amber-500 hover:text-amber-850 font-bold text-sm px-2 py-1 border border-amber-200 dark:border-amber-800 rounded-lg">Dismiss</button>
                 </div>
               )}
 
               {/* Filters */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center">
+              <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center">
                 <div className="w-full sm:flex-1 relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                     <FiUsers className="w-4 h-4" />
@@ -1105,14 +1159,14 @@ export default function SuperAdminDashboard() {
                     placeholder="Search admin users by name or email address..."
                     value={adminSearch}
                     onChange={(e) => setAdminSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
+                    className="w-full pl-9 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div className="w-full sm:w-48">
                   <select
                     value={adminStatusFilter}
                     onChange={(e) => setAdminStatusFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-slate-400 bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 cursor-pointer"
                   >
                     <option value="All">All Admins</option>
                     <option value="Active">Active Users</option>
@@ -1123,11 +1177,11 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Table */}
-              <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+              <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left border-collapse">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase">
+                      <tr className="bg-gray-50 dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-bold uppercase">
                         <th className="p-4">Name</th>
                         <th className="p-4">Email</th>
                         <th className="p-4">College</th>
@@ -1136,33 +1190,33 @@ export default function SuperAdminDashboard() {
                         <th className="p-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
                       {filteredAdmins.length === 0 ? (
                         <tr>
                           <td colSpan="6" className="p-8 text-center text-gray-400">No admins match filters.</td>
                         </tr>
                       ) : (
                         filteredAdmins.map((a) => (
-                          <tr key={a.id} className="hover:bg-gray-50/50">
-                            <td className="p-4 font-semibold text-slate-800">{a.name}</td>
-                            <td className="p-4 text-gray-600 font-mono">{a.email}</td>
-                            <td className="p-4 font-bold text-slate-700">{a.college?.name || 'N/A'}</td>
-                            <td className="p-4 text-gray-600">{a.phone}</td>
+                          <tr key={a.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                            <td className="p-4 font-semibold text-gray-900 dark:text-white">{a.name}</td>
+                            <td className="p-4 font-mono text-gray-600 dark:text-gray-400">{a.email}</td>
+                            <td className="p-4 font-bold text-gray-700 dark:text-gray-300">{a.college?.name || 'N/A'}</td>
+                            <td className="p-4">{a.phone}</td>
                             <td className="p-4">
-                              <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold border
-                                ${a.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                                  : a.status === 'Inactive' ? 'bg-red-50 text-red-700 border-red-100'
-                                  : a.status === 'Pending' ? 'bg-amber-50 text-amber-700 border-amber-100'
-                                  : a.status === 'Resent' ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                  : a.status === 'Cancelled' ? 'bg-rose-50 text-rose-700 border-rose-100'
-                                  : 'bg-gray-50 text-gray-600 border-gray-100'}`}>
+                              <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold border text-[10px]
+                                ${a.status === 'Active' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-[#10B981] border-emerald-100 dark:border-emerald-900/50'
+                                  : a.status === 'Inactive' ? 'bg-red-50 dark:bg-red-950/20 text-[#EF4444] border-red-100 dark:border-red-900/50'
+                                  : a.status === 'Pending' ? 'bg-amber-50 dark:bg-amber-950/20 text-[#F59E0B] border-amber-100 dark:border-amber-900/50'
+                                  : a.status === 'Resent' ? 'bg-blue-50 dark:bg-blue-950/20 text-[#2563EB] border-blue-100 dark:border-blue-900/50'
+                                  : a.status === 'Cancelled' ? 'bg-rose-50 dark:bg-rose-950/20 text-[#EF4444] border-rose-100 dark:border-rose-900/50'
+                                  : 'bg-gray-50 dark:bg-gray-805 text-gray-600 dark:text-gray-400 border-gray-100 dark:border-gray-700'}`}>
                                 {a.status}
                               </span>
                             </td>
                             <td className="p-4 text-right space-x-2 whitespace-nowrap">
                               <button
                                 onClick={() => handleOpenAdminModal('edit', a)}
-                                className="text-slate-600 hover:text-slate-900 border border-gray-100 hover:border-gray-200 bg-gray-50 p-1.5 rounded-lg inline-flex"
+                                className="text-gray-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white border border-gray-250 dark:border-gray-750 bg-gray-55 dark:bg-gray-800 p-1.5 rounded-lg inline-flex"
                                 title="Edit Admin Details"
                               >
                                 <FiEdit className="w-3.5 h-3.5" />
@@ -1174,13 +1228,13 @@ export default function SuperAdminDashboard() {
                                     <>
                                       <button
                                         onClick={() => handleResendAdminInvite(a.id)}
-                                        className="text-indigo-600 hover:text-indigo-800 text-xs font-semibold"
+                                        className="text-[#2563EB] hover:text-blue-800 text-xs font-semibold"
                                       >
                                         Resend
                                       </button>
                                       <button
                                         onClick={() => handleSoftDeleteAdmin(a.id)}
-                                        className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                                        className="text-red-500 hover:text-red-750 text-xs font-semibold"
                                       >
                                         Cancel
                                       </button>
@@ -1197,19 +1251,19 @@ export default function SuperAdminDashboard() {
                                   </button>
                                   <button
                                     onClick={() => handleGenerateTempPassword(a.id)}
-                                    className="text-indigo-600 hover:text-indigo-800 text-xs font-semibold"
+                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 text-xs font-semibold"
                                   >
                                     Generate Temp Pass
                                   </button>
                                   <button
                                     onClick={() => handleOpenTransferModal(a.college?._id)}
-                                    className="text-orange-600 hover:text-orange-800 text-xs font-semibold"
+                                    className="text-orange-600 hover:text-orange-855 text-xs font-semibold"
                                   >
                                     Transfer
                                   </button>
                                   <button
                                     onClick={() => handleSoftDeleteAdmin(a.id)}
-                                    className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                                    className="text-[#EF4444] hover:text-red-700 text-xs font-semibold"
                                     title="Deactivate Admin"
                                   >
                                     Archive
@@ -1232,16 +1286,16 @@ export default function SuperAdminDashboard() {
             <div className="space-y-8">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Subscription Management</h2>
-                  <p className="text-xs text-gray-500">Monitor tenant billing plans, remaining days, upgrade, suspend, and renew agreements</p>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">Subscription Management</h2>
+                  <p className="text-xs text-gray-555 dark:text-gray-400 font-medium">Monitor tenant billing plans, remaining days, upgrade, suspend, and renew agreements</p>
                 </div>
 
                 {/* College Billing Table */}
-                <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs text-left border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase">
+                        <tr className="bg-gray-50 dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-450 font-bold uppercase">
                           <th className="p-4">College</th>
                           <th className="p-4">Billing Plan</th>
                           <th className="p-4">Expiry Date</th>
@@ -1251,38 +1305,38 @@ export default function SuperAdminDashboard() {
                           <th className="p-4 text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
                         {colleges.length === 0 ? (
                           <tr>
                             <td colSpan="7" className="p-8 text-center text-gray-400">No colleges registered.</td>
                           </tr>
                         ) : (
                           colleges.map((c) => (
-                            <tr key={c._id} className="hover:bg-gray-50/50">
-                              <td className="p-4 font-bold text-slate-800">{c.name}</td>
-                              <td className="p-4 font-semibold text-indigo-700">{c.subscription?.planId?.name || 'N/A'}</td>
-                              <td className="p-4 text-gray-600">{c.subscription?.expiresAt ? new Date(c.subscription.expiresAt).toLocaleDateString() : 'N/A'}</td>
+                            <tr key={c._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                              <td className="p-4 font-bold text-gray-800 dark:text-white">{c.name}</td>
+                              <td className="p-4 font-semibold text-indigo-700 dark:text-indigo-400">{c.subscription?.planId?.name || 'N/A'}</td>
+                              <td className="p-4 font-mono">{c.subscription?.expiresAt ? new Date(c.subscription.expiresAt).toLocaleDateString() : 'N/A'}</td>
                               <td className="p-4 font-semibold">{getRemainingDays(c.subscription?.expiresAt)}</td>
                               <td className="p-4">
                                 <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold text-[10px] border
-                                  ${c.subscription?.paymentStatus === 'Paid' ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                    : c.subscription?.paymentStatus === 'Failed' ? 'bg-red-50 text-red-700 border-red-100'
-                                    : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                                  ${c.subscription?.paymentStatus === 'Paid' ? 'bg-blue-50 dark:bg-blue-950/20 text-[#2563EB] border-blue-100 dark:border-blue-900/50'
+                                    : c.subscription?.paymentStatus === 'Failed' ? 'bg-red-50 dark:bg-red-950/20 text-[#EF4444] border-red-100 dark:border-red-900/50'
+                                    : 'bg-amber-50 dark:bg-amber-950/20 text-[#F59E0B] border-amber-100 dark:border-amber-900/50'}`}>
                                   {c.subscription?.paymentStatus || 'Paid'}
                                 </span>
                               </td>
                               <td className="p-4">
                                 <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold text-[10px] border
-                                  ${c.subscription?.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                                    : c.subscription?.status === 'trialing' ? 'bg-indigo-50 text-indigo-700 border-indigo-100'
-                                    : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
+                                  ${c.subscription?.status === 'active' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-[#10B981] border-emerald-100 dark:border-emerald-900/50'
+                                    : c.subscription?.status === 'trialing' ? 'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/50'
+                                    : 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-455 border-rose-100 dark:border-rose-900/50'}`}>
                                   {c.subscription?.status}
                                 </span>
                               </td>
                               <td className="p-4 text-right space-x-2 whitespace-nowrap">
                                 <button
                                   onClick={() => handleOpenSubscriptionModal(c)}
-                                  className="text-slate-800 hover:text-black border border-gray-200 hover:border-gray-300 bg-white px-2.5 py-1 rounded-lg font-semibold text-[11px]"
+                                  className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white border border-gray-250 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-1.5 rounded-xl font-semibold text-[11px]"
                                 >
                                   Modify Agreement
                                 </button>
@@ -1297,26 +1351,26 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Sub-Section: Plans Directory */}
-              <div className="space-y-4 pt-4 border-t border-gray-200">
+              <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-850">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900">SaaS Subscription Plans</h3>
-                    <p className="text-xs text-gray-500">Configure global subscription catalog rates, features, and database constraints</p>
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">SaaS Subscription Plans</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Configure global subscription catalog rates, features, and database constraints</p>
                   </div>
                   <button
                     onClick={() => handleOpenPlanModal('create')}
-                    className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2 px-3.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all"
+                    className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-xs py-2 px-3.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all border-none"
                   >
                     <FiPlus className="w-3.5 h-3.5" />
                     New Billing Plan
                   </button>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs text-left border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase">
+                        <tr className="bg-gray-50 dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-bold uppercase">
                           <th className="p-4">Plan Name</th>
                           <th className="p-4">Price</th>
                           <th className="p-4">Billing Cycle</th>
@@ -1326,29 +1380,29 @@ export default function SuperAdminDashboard() {
                           <th className="p-4 text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
                         {plans.length === 0 ? (
                           <tr>
                             <td colSpan="7" className="p-8 text-center text-gray-400">No subscription plans created.</td>
                           </tr>
                         ) : (
                           plans.map((p) => (
-                            <tr key={p._id} className="hover:bg-gray-50/50">
-                              <td className="p-4 font-bold text-slate-800">{p.name}</td>
-                              <td className="p-4 font-semibold text-gray-800">${p.price}</td>
-                              <td className="p-4 capitalize text-gray-600">{p.billingCycle}</td>
-                              <td className="p-4 text-gray-600">{p.maxStudents.toLocaleString()}</td>
-                              <td className="p-4 text-gray-600">{p.maxGroups.toLocaleString()}</td>
+                            <tr key={p._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                              <td className="p-4 font-bold text-gray-800 dark:text-white">{p.name}</td>
+                              <td className="p-4 font-semibold text-gray-800 dark:text-gray-200">${p.price}</td>
+                              <td className="p-4 capitalize text-gray-600 dark:text-gray-400">{p.billingCycle}</td>
+                              <td className="p-4 text-gray-650 dark:text-gray-400 font-mono">{p.maxStudents.toLocaleString()}</td>
+                              <td className="p-4 text-gray-650 dark:text-gray-400 font-mono">{p.maxGroups.toLocaleString()}</td>
                               <td className="p-4">
-                                <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold border
-                                  ${p.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'}`}>
+                                <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold border text-[10px]
+                                  ${p.isActive ? 'bg-emerald-50 dark:bg-emerald-950/20 text-[#10B981] border-emerald-100 dark:border-emerald-900/50' : 'bg-red-50 dark:bg-red-950/20 text-[#EF4444] border-red-100 dark:border-red-900/50'}`}>
                                   {p.isActive ? 'Active' : 'Inactive'}
                                 </span>
                               </td>
                               <td className="p-4 text-right">
                                 <button
                                   onClick={() => handleOpenPlanModal('edit', p)}
-                                  className="text-slate-600 hover:text-slate-900 border border-gray-100 hover:border-gray-200 bg-gray-50 p-1.5 rounded-lg inline-flex"
+                                  className="text-gray-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white border border-gray-250 dark:border-gray-750 bg-gray-55 dark:bg-gray-800 p-1.5 rounded-lg inline-flex"
                                   title="Edit Plan Constraints"
                                 >
                                   <FiEdit className="w-3.5 h-3.5" />
@@ -1370,18 +1424,18 @@ export default function SuperAdminDashboard() {
           {activeTab === 'logs' && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Platform System Audit Logs</h2>
-                <p className="text-xs text-gray-500">View detailed administrative actions history, system logins, and operational telemetry</p>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Platform System Audit Logs</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">View detailed administrative actions history, system logins, and operational telemetry</p>
               </div>
 
               {/* Advanced Filter Toolbar */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+              <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-sm grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filter by College</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Filter by College</label>
                   <select
                     value={logCollegeFilter}
                     onChange={(e) => setLogCollegeFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-slate-400 bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 cursor-pointer"
                   >
                     <option value="">All Institutions</option>
                     {colleges.map(c => (
@@ -1390,11 +1444,11 @@ export default function SuperAdminDashboard() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filter by Action</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Filter by Action</label>
                   <select
                     value={logActionFilter}
                     onChange={(e) => setLogActionFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-slate-400 bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 cursor-pointer"
                   >
                     <option value="">All Actions</option>
                     <option value="COLLEGE_CREATED">College Created</option>
@@ -1407,24 +1461,24 @@ export default function SuperAdminDashboard() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filter by Date</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Filter by Date</label>
                   <input
                     type="date"
                     value={logDateFilter}
                     onChange={(e) => setLogDateFilter(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-slate-400 bg-white font-sans"
+                    className="w-full px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 font-sans"
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={handleApplyLogFilters}
-                    className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2 rounded-xl text-center"
+                    className="flex-1 bg-blue-600 dark:bg-[#2563EB] hover:bg-blue-700 dark:hover:bg-[#1D4ED8] text-white font-semibold text-xs py-2 rounded-xl text-center border-none"
                   >
                     Apply Filters
                   </button>
                   <button
                     onClick={handleClearLogFilters}
-                    className="px-3 border border-gray-200 hover:bg-gray-50 font-semibold text-xs py-2 rounded-xl text-center text-gray-500"
+                    className="px-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 font-semibold text-xs py-2 rounded-xl text-center text-gray-500 dark:text-gray-400"
                   >
                     Clear
                   </button>
@@ -1432,11 +1486,11 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Table list */}
-              <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+              <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
                   <table className="w-full text-xs text-left border-collapse">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase sticky top-0">
+                      <tr className="bg-gray-50 dark:bg-[#0F172A] border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-bold uppercase sticky top-0">
                         <th className="p-4">Action</th>
                         <th className="p-4">Scope College</th>
                         <th className="p-4">Details Log</th>
@@ -1444,17 +1498,17 @@ export default function SuperAdminDashboard() {
                         <th className="p-4 text-right">Timestamp</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 text-slate-700">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-slate-700 dark:text-gray-300">
                       {auditLogs.length === 0 ? (
                         <tr>
                           <td colSpan="5" className="p-8 text-center text-gray-400">No action logs found.</td>
                         </tr>
                       ) : (
                         auditLogs.map((log) => (
-                          <tr key={log._id || Math.random()} className="hover:bg-gray-50/50">
-                            <td className="p-4 font-bold text-slate-900">{log.action}</td>
-                            <td className="p-4 font-semibold text-slate-800">{log.collegeId?.name || 'Platform Level'}</td>
-                            <td className="p-4 text-gray-500">{log.details}</td>
+                          <tr key={log._id || Math.random()} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                            <td className="p-4 font-bold text-gray-900 dark:text-white">{log.action}</td>
+                            <td className="p-4 font-semibold text-gray-800 dark:text-gray-200">{log.collegeId?.name || 'Platform Level'}</td>
+                            <td className="p-4 text-gray-500 dark:text-gray-400">{log.details}</td>
                             <td className="p-4 font-semibold">
                               {log.actor?.name || 'System'} <span className="text-[10px] text-gray-400 font-normal">({log.actor?.email || 'automated'})</span>
                             </td>
@@ -1473,54 +1527,54 @@ export default function SuperAdminDashboard() {
 
           {/* TAB 6: SYSTEM SETTINGS */}
           {activeTab === 'settings' && (
-            <div className="max-w-2xl bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="max-w-2xl bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm space-y-6">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Global SaaS Settings</h2>
-                <p className="text-xs text-gray-400">Manage backend authentication limits, support contact emails, default trial billing rates, and SMTP dispatchers</p>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Global SaaS Settings</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Manage backend authentication limits, support contact emails, default trial billing rates, and SMTP dispatchers</p>
               </div>
 
               <form onSubmit={handleSaveSettings} className="space-y-6 text-xs">
                 
                 {/* Section 1: SMTP Config */}
                 <div className="space-y-3">
-                  <h3 className="font-bold text-slate-800 border-b border-gray-100 pb-2 uppercase tracking-wider text-[10px]">SMTP Dispatcher Credentials</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 pb-2 uppercase tracking-wider text-[10px]">SMTP Dispatcher Credentials</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">SMTP Host</label>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">SMTP Host</label>
                       <input
                         type="text"
                         value={settingsForm.smtpHost}
                         onChange={(e) => setSettingsForm({ ...settingsForm, smtpHost: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                         placeholder="smtp.mailtrap.io"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">SMTP Port</label>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">SMTP Port</label>
                       <input
                         type="text"
                         value={settingsForm.smtpPort}
                         onChange={(e) => setSettingsForm({ ...settingsForm, smtpPort: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                         placeholder="2525"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">SMTP Username</label>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">SMTP Username</label>
                       <input
                         type="text"
                         value={settingsForm.smtpUser}
                         onChange={(e) => setSettingsForm({ ...settingsForm, smtpUser: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">SMTP Password</label>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">SMTP Password</label>
                       <input
                         type="password"
                         value={settingsForm.smtpPass}
                         onChange={(e) => setSettingsForm({ ...settingsForm, smtpPass: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                       />
                     </div>
                   </div>
@@ -1528,34 +1582,34 @@ export default function SuperAdminDashboard() {
 
                 {/* Section 2: Platform Configurations */}
                 <div className="space-y-3">
-                  <h3 className="font-bold text-slate-800 border-b border-gray-100 pb-2 uppercase tracking-wider text-[10px]">Administrative Configurations</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 pb-2 uppercase tracking-wider text-[10px]">Administrative Configurations</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Support Contact Email</label>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Support Contact Email</label>
                       <input
                         type="email"
                         value={settingsForm.supportEmail}
                         onChange={(e) => setSettingsForm({ ...settingsForm, supportEmail: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                         placeholder="support@projx.com"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">JWT Key Expiry</label>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">JWT Key Expiry</label>
                       <input
                         type="text"
                         value={settingsForm.jwtExpiresIn}
                         onChange={(e) => setSettingsForm({ ...settingsForm, jwtExpiresIn: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                         placeholder="7d"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Default Onboarding Plan</label>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Default Onboarding Plan</label>
                       <select
                         value={settingsForm.defaultSubscriptionPlanId}
                         onChange={(e) => setSettingsForm({ ...settingsForm, defaultSubscriptionPlanId: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 bg-white"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
                       >
                         <option value="">No Default Plan</option>
                         {plans.map(p => (
@@ -1567,23 +1621,23 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 {/* Maintenance Toggle */}
-                <div className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-200 rounded-xl">
+                <div className="flex items-center justify-between p-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
                   <div>
-                    <label className="font-bold text-slate-800 block">Maintenance Flag (SaaS Lock)</label>
-                    <span className="text-[10px] text-gray-400">Put platform completely offline for system adjustments</span>
+                    <label className="font-bold text-gray-800 dark:text-gray-200 block">Maintenance Flag (SaaS Lock)</label>
+                    <span className="text-[10px] text-gray-400 dark:text-gray-500">Put platform completely offline for system adjustments</span>
                   </div>
                   <input
                     type="checkbox"
                     checked={settingsForm.maintenanceMode}
                     onChange={(e) => setSettingsForm({ ...settingsForm, maintenanceMode: e.target.checked })}
-                    className="w-5 h-5 accent-slate-900 rounded"
+                    className="w-5 h-5 accent-blue-600 rounded cursor-pointer"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl shadow transition-all text-xs"
+                  className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold py-2.5 rounded-xl shadow transition-all text-xs border-none"
                 >
                   {loading ? 'Saving Platform Config…' : 'Save SaaS Configurations'}
                 </button>
@@ -1597,50 +1651,51 @@ export default function SuperAdminDashboard() {
 
       {/* College Modal (Create/Edit) */}
       {collegeModal.open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative border border-gray-100">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl w-full max-w-lg p-6 shadow-2xl relative border border-gray-100 dark:border-gray-700">
             <button
               onClick={() => setCollegeModal({ open: false, mode: 'create', data: null })}
-              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              aria-label="Close Modal"
             >
               <FiX className="w-5 h-5" />
             </button>
             
-            <h2 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">
               {collegeModal.mode === 'create' ? 'Register Institution Tenant' : 'Edit College Parameters'}
             </h2>
 
             <form onSubmit={handleSaveCollege} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">College Name</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">College Name</label>
                 <input
                   value={collegeForm.name}
                   onChange={(e) => setCollegeForm({ ...collegeForm, name: e.target.value })}
                   placeholder="e.g. BITS Pilani"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">College Code</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">College Code</label>
                   <input
                     value={collegeForm.code}
                     onChange={(e) => setCollegeForm({ ...collegeForm, code: e.target.value })}
                     placeholder="e.g. BITS"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 uppercase"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 uppercase text-gray-900 dark:text-white"
                     disabled={collegeModal.mode === 'edit'}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">URL Tenant Slug</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">URL Tenant Slug</label>
                   <input
                     value={collegeForm.slug}
                     onChange={(e) => setCollegeForm({ ...collegeForm, slug: e.target.value })}
                     placeholder="e.g. bits-pilani"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                     disabled={collegeModal.mode === 'edit'}
                   />
                 </div>
@@ -1648,55 +1703,55 @@ export default function SuperAdminDashboard() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Official Email</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Official Email</label>
                   <input
                     type="email"
                     value={collegeForm.email}
                     onChange={(e) => setCollegeForm({ ...collegeForm, email: e.target.value })}
                     placeholder="admin@bits.edu"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Contact Phone</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Contact Phone</label>
                   <input
                     value={collegeForm.phone}
                     onChange={(e) => setCollegeForm({ ...collegeForm, phone: e.target.value })}
                     placeholder="+91-..."
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Campuses Location Address</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Campuses Location Address</label>
                 <textarea
                   value={collegeForm.address}
                   onChange={(e) => setCollegeForm({ ...collegeForm, address: e.target.value })}
                   placeholder="Street details..."
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 h-16"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 h-16 text-gray-900 dark:text-white"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Website URL</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Website URL</label>
                   <input
                     value={collegeForm.website}
                     onChange={(e) => setCollegeForm({ ...collegeForm, website: e.target.value })}
                     placeholder="www.bits.edu"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Record Status</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Record Status</label>
                   <select
                     value={collegeForm.status}
                     onChange={(e) => setCollegeForm({ ...collegeForm, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
                   >
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
@@ -1708,7 +1763,7 @@ export default function SuperAdminDashboard() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center"
+                className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center border-none"
               >
                 {loading ? 'Saving tenant...' : 'Commit Tenant configurations'}
               </button>
@@ -1719,27 +1774,28 @@ export default function SuperAdminDashboard() {
 
       {/* Admin Invite Modal */}
       {adminModal.open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100 dark:border-gray-700">
             <button
               onClick={() => setAdminModal({ open: false, mode: 'create', data: null })}
-              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-655 dark:hover:text-gray-200"
+              aria-label="Close Modal"
             >
               <FiX className="w-5 h-5" />
             </button>
 
-            <h2 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">
               {adminModal.mode === 'create' ? 'Invite College Admin' : 'Edit Admin Details'}
             </h2>
 
             <form onSubmit={handleSaveAdmin} className="space-y-4 text-xs">
               {adminModal.mode === 'create' && (
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Associate College</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Associate College</label>
                   <select
                     value={adminForm.collegeId}
                     onChange={(e) => setAdminForm({ ...adminForm, collegeId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
                     required
                   >
                     <option value="">Select Organization</option>
@@ -1751,45 +1807,45 @@ export default function SuperAdminDashboard() {
               )}
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Official Email Address</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Official Email Address</label>
                 <input
                   type="email"
                   value={adminForm.email}
                   onChange={(e) => setAdminForm({ ...adminForm, email: e.target.value })}
                   placeholder="admin@college.edu"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Administrator Full Name</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Administrator Full Name</label>
                 <input
                   type="text"
                   value={adminForm.name}
                   onChange={(e) => setAdminForm({ ...adminForm, name: e.target.value })}
                   placeholder="John Doe"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Contact Phone (Optional)</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Contact Phone (Optional)</label>
                 <input
                   type="text"
                   value={adminForm.phoneNumber}
                   onChange={(e) => setAdminForm({ ...adminForm, phoneNumber: e.target.value })}
                   placeholder="10-digit number"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center"
+                className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center border-none"
               >
-                {loading ? 'Processing...' : 'Generate Onboarding Invitation'}
+                {loading ? 'Processing...' : 'Onboard Administrator'}
               </button>
             </form>
           </div>
@@ -1798,29 +1854,30 @@ export default function SuperAdminDashboard() {
 
       {/* Transfer Admin Modal */}
       {transferModal.open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100 dark:border-gray-700">
             <button
               onClick={() => setTransferModal({ open: false, collegeId: null })}
-              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-655 dark:hover:text-gray-200"
+              aria-label="Close Modal"
             >
               <FiX className="w-5 h-5" />
             </button>
 
-            <h2 className="text-sm font-bold text-slate-900 mb-2 uppercase tracking-wider">Transfer College Admin</h2>
-            <p className="text-[10px] text-red-500 font-semibold mb-4 leading-relaxed bg-red-50 border border-red-100 p-2.5 rounded-xl">
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-2 uppercase tracking-wider">Transfer College Admin</h2>
+            <p className="text-[10px] text-red-500 font-semibold mb-4 leading-relaxed bg-red-50 dark:bg-red-950/20 border border-red-105 dark:border-red-900 p-2.5 rounded-xl">
               ⚠️ Warning: Confirming this action immediately suspends (deactivates) the current active college administrator and registers a new email invitation token.
             </p>
 
             <form onSubmit={handleTransferAdmin} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">New Administrator Email</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">New Administrator Email</label>
                 <input
                   type="email"
                   value={transferForm.email}
                   onChange={(e) => setTransferForm({ ...transferForm, email: e.target.value })}
                   placeholder="newadmin@bits.edu"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white font-mono"
                   required
                 />
               </div>
@@ -1828,7 +1885,7 @@ export default function SuperAdminDashboard() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center"
+                className="w-full bg-[#F59E0B] hover:bg-amber-700 text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center border-none"
               >
                 {loading ? 'Transferring administrative rights...' : 'Transfer Admin & Generate Invitation'}
               </button>
@@ -1839,26 +1896,27 @@ export default function SuperAdminDashboard() {
 
       {/* Modify Subscription Modal */}
       {subscriptionModal.open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100 dark:border-gray-700">
             <button
               onClick={() => setSubscriptionModal({ open: false, college: null })}
-              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-655 dark:hover:text-gray-200"
+              aria-label="Close Modal"
             >
               <FiX className="w-5 h-5" />
             </button>
 
-            <h2 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">
               Modify Subscription Plan for {subscriptionModal.college?.name}
             </h2>
 
             <form onSubmit={handleUpdateSubscription} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Modification Action</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Modification Action</label>
                 <select
                   value={subscriptionForm.action}
                   onChange={(e) => setSubscriptionForm({ ...subscriptionForm, action: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 bg-white"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
                 >
                   <option value="upgrade">Upgrade Subscription Plan</option>
                   <option value="downgrade">Downgrade Subscription Plan</option>
@@ -1869,11 +1927,11 @@ export default function SuperAdminDashboard() {
 
               {(subscriptionForm.action === 'upgrade' || subscriptionForm.action === 'downgrade') && (
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Select Billing Plan</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Select Billing Plan</label>
                   <select
                     value={subscriptionForm.planId}
                     onChange={(e) => setSubscriptionForm({ ...subscriptionForm, planId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
                     required
                   >
                     <option value="">Select Plan</option>
@@ -1885,22 +1943,22 @@ export default function SuperAdminDashboard() {
               )}
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">New Expiry Date</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">New Expiry Date</label>
                 <input
                   type="date"
                   value={subscriptionForm.expiresAt}
                   onChange={(e) => setSubscriptionForm({ ...subscriptionForm, expiresAt: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 bg-white"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white"
                   required={subscriptionForm.action === 'renew'}
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Payment Settlement Status</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Payment Settlement Status</label>
                 <select
                   value={subscriptionForm.paymentStatus}
                   onChange={(e) => setSubscriptionForm({ ...subscriptionForm, paymentStatus: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 bg-white"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
                 >
                   <option value="Paid">Settled (Paid)</option>
                   <option value="Unpaid">Outstanding (Unpaid)</option>
@@ -1912,7 +1970,7 @@ export default function SuperAdminDashboard() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center"
+                className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center border-none"
               >
                 {loading ? 'Processing subscription change...' : 'Save Subscription Details'}
               </button>
@@ -1923,49 +1981,50 @@ export default function SuperAdminDashboard() {
 
       {/* Plan Modal (Create/Edit Plans) */}
       {planModal.open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100 dark:border-gray-700">
             <button
               onClick={() => setPlanModal({ open: false, mode: 'create', data: null })}
-              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-655 dark:hover:text-gray-200"
+              aria-label="Close Modal"
             >
               <FiX className="w-5 h-5" />
             </button>
 
-            <h2 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">
               {planModal.mode === 'create' ? 'Create SaaS Billing Plan' : 'Edit Plan Configuration'}
             </h2>
 
             <form onSubmit={handleSavePlan} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Plan Name</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Plan Name</label>
                 <input
                   type="text"
                   value={planForm.name}
                   onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
                   placeholder="e.g. Gold Tier"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Rate Price (USD)</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 tracking-wider mb-1 uppercase">Rate Price (USD)</label>
                   <input
                     type="number"
                     value={planForm.price}
                     onChange={(e) => setPlanForm({ ...planForm, price: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Billing Cycle</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 tracking-wider mb-1 uppercase">Billing Cycle</label>
                   <select
                     value={planForm.billingCycle}
                     onChange={(e) => setPlanForm({ ...planForm, billingCycle: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400 bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
                   >
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
@@ -1975,35 +2034,35 @@ export default function SuperAdminDashboard() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Max Student limit</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 tracking-wider mb-1 uppercase">Max Student limit</label>
                   <input
                     type="number"
                     value={planForm.maxStudents}
                     onChange={(e) => setPlanForm({ ...planForm, maxStudents: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Max Group limit</label>
+                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 tracking-wider mb-1 uppercase">Max Group limit</label>
                   <input
                     type="number"
                     value={planForm.maxGroups}
                     onChange={(e) => setPlanForm({ ...planForm, maxGroups: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Features (comma-separated list)</label>
+                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 tracking-wider mb-1 uppercase">Features (comma-separated list)</label>
                 <input
                   type="text"
                   value={planForm.features}
                   onChange={(e) => setPlanForm({ ...planForm, features: e.target.value })}
                   placeholder="Feature A, Feature B..."
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-slate-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -2012,15 +2071,15 @@ export default function SuperAdminDashboard() {
                   type="checkbox"
                   checked={planForm.isActive}
                   onChange={(e) => setPlanForm({ ...planForm, isActive: e.target.checked })}
-                  className="w-4 h-4 rounded text-slate-900"
+                  className="w-4 h-4 rounded text-[#2563EB] cursor-pointer"
                 />
-                <label className="font-semibold text-slate-800">Plan is Active & Selectable</label>
+                <label className="font-semibold text-gray-850 dark:text-gray-250">Plan is Active & Selectable</label>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center"
+                className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center border-none"
               >
                 {loading ? 'Saving Billing Plan...' : 'Save Plan Details'}
               </button>
