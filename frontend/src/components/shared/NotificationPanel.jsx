@@ -1,10 +1,12 @@
 /**
  * NotificationPanel.jsx - Real-time notification sidebar/dropdown
- * Polls every 30 seconds for new notifications, synchronized with Socket.io
  */
 import { useEffect, useState, useRef } from 'react'
 import api from '../../services/api'
-import { FiBell, FiX, FiCheck, FiTrash2 } from 'react-icons/fi'
+import { 
+  FiBell, FiX, FiCheck, FiUser, FiFileText, FiCalendar, 
+  FiTrendingUp, FiMessageSquare, FiBookOpen, FiAlertCircle, FiSettings, FiCheckSquare, FiAward, FiShield
+} from 'react-icons/fi'
 import { formatDistanceToNow } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
@@ -12,32 +14,52 @@ import { useSocket } from '../../context/SocketContext'
 import { getNotificationRoute } from '../../utils/notificationRouter'
 import toast from 'react-hot-toast'
 
-const typeIcons = {
-  project_submission:      '📥',
-  project_approved:        '✅',
-  project_rejected:        '❌',
-  guide_assignment:        '👨‍🏫',
-  guide_assigned:          '👨‍🏫',
-  guide_accepted:          '🤝',
-  guide_rejected:          '🚫',
-  meeting_scheduled:       '📅',
-  meeting_accepted:        '🤝',
-  meeting_rejected:        '🚫',
-  meeting_report:          '📋',
-  student_file_submission: '📁',
-  file_review:             '📝',
-  progress_update:         '📈',
-  progress_updated:        '📈',
-  evaluation:              '📊',
-  marks_updated:           '📊',
-  chat_message:            '💬',
-  announcement:            '📢',
-  general:                 '🔔',
+const getIcon = (type) => {
+  switch (type) {
+    case 'project_submission':
+    case 'student_file_submission':
+    case 'submission_uploaded':
+      return <FiFileText className="w-4 h-4 text-blue-500" />
+    case 'project_approved':
+    case 'guide_accepted':
+    case 'group_accepted':
+    case 'meeting_accepted':
+    case 'meeting_approved':
+    case 'invitation_accepted':
+      return <FiCheck className="w-4 h-4 text-green-500" />
+    case 'project_rejected':
+    case 'guide_rejected':
+    case 'group_rejected':
+    case 'meeting_rejected':
+      return <FiAlertCircle className="w-4 h-4 text-red-500" />
+    case 'meeting_scheduled':
+      return <FiCalendar className="w-4 h-4 text-yellow-500" />
+    case 'guide_assigned':
+    case 'guide_assignment':
+    case 'teacher_assigned':
+      return <FiUser className="w-4 h-4 text-purple-500" />
+    case 'chat_message':
+      return <FiMessageSquare className="w-4 h-4 text-indigo-500" />
+    case 'announcement':
+      return <FiBookOpen className="w-4 h-4 text-cyan-500" />
+    case 'progress_update':
+    case 'progress_updated':
+      return <FiTrendingUp className="w-4 h-4 text-teal-500" />
+    case 'password_reset':
+    case 'profile_updated':
+      return <FiSettings className="w-4 h-4 text-gray-500" />
+    case 'marks_published':
+    case 'submission_reviewed':
+      return <FiAward className="w-4 h-4 text-orange-500" />
+    case 'audit_event':
+      return <FiShield className="w-4 h-4 text-amber-500" />
+    default:
+      return <FiBell className="w-4 h-4 text-primary-500" />
+  }
 }
 
 export default function NotificationPanel({ onClose, setUnreadCount, activeMode }) {
   const [notifications, setNotifications] = useState([])
-  const [activeTab, setActiveTab] = useState('unread')
   const panelRef = useRef(null)
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -54,12 +76,10 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
 
   useEffect(() => {
     fetchNotifications()
-    // Poll every 30 seconds
     const interval = setInterval(fetchNotifications, 30000)
     return () => clearInterval(interval)
   }, [activeMode])
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) onClose()
@@ -68,7 +88,6 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
     return () => document.removeEventListener('mousedown', handler)
   }, [onClose])
 
-  // Listen to Socket.IO events for dynamic synchronization
   useEffect(() => {
     if (!socket) return
 
@@ -87,26 +106,15 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
       });
       setUnreadCount(prev => prev + 1)
     }
-    const handleSocketDeleted = ({ id }) => {
-      setNotifications(prev => prev.filter(n => n._id !== id))
-    }
-    const handleSocketClearAll = () => {
-      setNotifications([])
-      setUnreadCount(0)
-    }
 
     socket.on('notification:read', handleSocketRead)
     socket.on('notification:read-all', handleSocketReadAll)
     socket.on('notification:new', handleSocketNew)
-    socket.on('notification:deleted', handleSocketDeleted)
-    socket.on('notification:clear-all', handleSocketClearAll)
 
     return () => {
       socket.off('notification:read', handleSocketRead)
       socket.off('notification:read-all', handleSocketReadAll)
       socket.off('notification:new', handleSocketNew)
-      socket.off('notification:deleted', handleSocketDeleted)
-      socket.off('notification:clear-all', handleSocketClearAll)
     }
   }, [socket])
 
@@ -117,10 +125,12 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
     onClose()
 
     const displayRole = user?.role === 'teacher' && user?.isAlsoGuide ? activeMode : user?.role
-    const route = getNotificationRoute(n, displayRole)
+    const fallbackRoute = getNotificationRoute(n, displayRole)
+    const targetPath = n.destinationRoute || n.route || n.link || fallbackRoute.path || '/'
+    const targetState = fallbackRoute.state || {}
 
-    toast.success('Opened from Notification', { icon: '🔔', id: 'notif-toast' })
-    navigate(route.path, { state: route.state })
+    toast.success('Opening related page...', { icon: '🔔', id: 'notif-toast' })
+    navigate(targetPath, { state: targetState })
   }
 
   const handleMarkRead = async (id) => {
@@ -130,19 +140,6 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
       await api.patch(`/notifications/${id}/read`)
     } catch (err) {
       console.error('Failed to mark notification as read:', err)
-    }
-  }
-
-  const handleDelete = async (id) => {
-    const isUnread = notifications.find(n => n._id === id && !n.isRead)
-    setNotifications(prev => prev.filter(item => item._id !== id))
-    if (isUnread) {
-      setUnreadCount(prev => Math.max(0, prev - 1))
-    }
-    try {
-      await api.delete(`/notifications/${id}`)
-    } catch (err) {
-      console.error('Failed to delete notification:', err)
     }
   }
 
@@ -157,124 +154,71 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
     }
   }
 
-  const clearAll = async () => {
-    const modeQuery = activeMode ? `?mode=${activeMode}` : ''
-    setNotifications([])
-    setUnreadCount(0)
-    try {
-      await api.delete(`/notifications/clear-all${modeQuery}`)
-    } catch (err) {
-      console.error('Failed to clear all notifications:', err)
-    }
-  }
-
-  const unreadNotifications = notifications.filter(n => !n.isRead)
-  const readNotifications = notifications.filter(n => n.isRead)
-  const displayedNotifications = activeTab === 'unread' ? unreadNotifications : readNotifications
-
   return (
     <div
       ref={panelRef}
-      className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+      className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden animate-fadeIn"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <FiBell className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-          <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">Notifications</span>
+          <FiBell className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+          <span className="font-semibold text-sm text-gray-850 dark:text-gray-200">Notifications</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <button onClick={markAllRead} className="text-xs text-primary-600 dark:text-primary-400 hover:underline">
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={markAllRead} 
+            className="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-750 dark:hover:text-primary-350 transition-colors"
+          >
             Mark all read
           </button>
-          <span className="text-gray-300 dark:text-gray-600 text-xs">|</span>
-          <button onClick={clearAll} className="text-xs text-red-650 dark:text-red-400 hover:underline font-medium">
-            Clear all
-          </button>
-          <button onClick={onClose} className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-655 dark:hover:text-gray-300 ml-1">
             <FiX className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/10">
-        <button
-          onClick={() => setActiveTab('unread')}
-          className={`flex-1 py-2 text-center text-xs font-semibold border-b-2 transition-colors ${
-            activeTab === 'unread'
-              ? 'border-primary-500 text-primary-600 dark:text-primary-400 font-bold'
-              : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-          }`}
-        >
-          Unread ({unreadNotifications.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('read')}
-          className={`flex-1 py-2 text-center text-xs font-semibold border-b-2 transition-colors ${
-            activeTab === 'read'
-              ? 'border-primary-500 text-primary-600 dark:text-primary-400 font-bold'
-              : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-          }`}
-        >
-          Read ({readNotifications.length})
-        </button>
-      </div>
-
       {/* List */}
-      <div className="max-h-96 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700/60">
-        {displayedNotifications.length === 0 ? (
-          <p className="text-center text-sm text-gray-400 py-8">No notifications in this tab</p>
+      <div className="max-h-96 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700/50">
+        {notifications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+            <span className="text-2xl mb-2">🔔</span>
+            <p className="text-xs text-gray-400 font-medium">All caught up! No notifications.</p>
+          </div>
         ) : (
-          displayedNotifications.map((n) => (
+          notifications.map((n) => (
             <div
               key={n._id}
-              className={`group px-4 py-3 flex gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors relative
-                ${!n.isRead ? 'bg-blue-50/30 dark:bg-blue-950/10 border-l-4 border-l-primary-500' : ''}`}
+              className={`px-4 py-3 flex gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors relative ${
+                !n.isRead ? 'bg-blue-50/20 dark:bg-blue-950/10' : ''
+              }`}
               onClick={() => handleNotificationClick(n)}
             >
-              <span className="text-lg flex-shrink-0 mt-0.5">{typeIcons[n.type] || '🔔'}</span>
+              {/* Icon Container */}
+              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                {getIcon(n.type)}
+              </div>
+
+              {/* Text content */}
               <div className="flex-1 min-w-0">
-                {n.title && <p className="text-sm font-semibold text-gray-900 dark:text-white">{n.title}</p>}
-                <p className={`text-xs text-gray-700 dark:text-gray-300 leading-relaxed ${!n.isRead ? 'font-medium' : ''}`}>
+                <div className="flex items-start justify-between gap-1">
+                  <p className={`text-xs font-bold truncate text-gray-900 dark:text-white ${!n.isRead ? 'pr-2' : ''}`}>
+                    {n.title || 'Notification'}
+                  </p>
+                  
+                  {/* Unread dot */}
+                  {!n.isRead && (
+                    <span className="w-2.5 h-2.5 bg-blue-500 rounded-full flex-shrink-0 mt-1" title="Unread" />
+                  )}
+                </div>
+
+                <p className={`text-xs text-gray-655 dark:text-gray-350 leading-relaxed mt-0.5 ${!n.isRead ? 'font-semibold' : ''}`}>
                   {n.message}
                 </p>
-                {n.reason && (
-                  <div className="mt-1 p-2 bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/30 rounded text-xs text-red-700 dark:text-red-300 italic">
-                    <span className="font-semibold not-italic">Reason: </span>{n.reason}
-                  </div>
-                )}
-                <div className="flex justify-between items-center mt-1.5">
-                  <span className="text-[10px] text-gray-400 dark:text-gray-500">
-                    {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
-                  </span>
-                  
-                  {/* Action triggers */}
-                  <div className="flex items-center gap-2 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                    {!n.isRead && (
-                      <button
-                        title="Mark as Read"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkRead(n._id);
-                        }}
-                        className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-green-600 dark:hover:text-green-400"
-                      >
-                        <FiCheck className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                    <button
-                      title="Delete"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(n._id);
-                      }}
-                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-red-600 dark:hover:text-red-400"
-                    >
-                      <FiTrash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-medium">
+                  {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                </p>
               </div>
             </div>
           ))
