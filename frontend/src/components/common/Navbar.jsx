@@ -52,7 +52,7 @@ export default function Navbar({ onToggleSidebar }) {
     setLogoClicks(activeClicks)
     if (activeClicks.length >= 5) {
       e.preventDefault()
-      navigate('/system/login')
+      navigate('/system/dashboard')
     }
   }
 

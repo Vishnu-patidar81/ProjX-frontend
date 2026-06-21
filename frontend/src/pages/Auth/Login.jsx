@@ -20,7 +20,7 @@ export default function Login() {
     setLogoClicks(activeClicks)
     if (activeClicks.length >= 5) {
       e.preventDefault()
-      navigate('/system/login')
+      navigate('/system/dashboard')
     }
   }
 
@@ -46,12 +46,7 @@ export default function Login() {
         navigate(dash)
       }
     } catch (err) {
-      if (err.response?.data?.isSuperAdmin) {
-        toast.error(err.response.data.message)
-        setTimeout(() => navigate('/system/login'), 1500)
-      } else {
-        toast.error(err.response?.data?.message || 'Login failed')
-      }
+      toast.error(err.response?.data?.message || 'Login failed')
     } finally {
       setLoading(false)
     }

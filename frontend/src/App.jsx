@@ -55,7 +55,7 @@ export default function App() {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.shiftKey && e.key.toUpperCase() === 'A') {
         e.preventDefault()
-        navigate('/system/login')
+        navigate('/system/dashboard')
       }
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -77,7 +77,7 @@ export default function App() {
       <Route path="/register"        element={<Navigate to="/login" replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/activate-account/:token" element={<ActivateAccount />} />
-      <Route path="/system/login"    element={!user ? <SystemLogin />    : <Navigate to="/system/dashboard" replace />} />
+      <Route path="/system/login"    element={<Navigate to="/login" replace />} />
 
       {/* Student routes */}
       <Route element={<ProtectedRoute allowedRoles={['student']} />}>

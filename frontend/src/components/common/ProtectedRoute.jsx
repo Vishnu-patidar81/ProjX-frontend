@@ -10,9 +10,6 @@ export default function ProtectedRoute({ allowedRoles, isSystemPortal }) {
   const accessingSystem = isSystemPortal || location.pathname.startsWith('/system')
 
   if (!user) {
-    if (accessingSystem) {
-      return <Navigate to="/system/login" replace />
-    }
     return <Navigate to="/login" replace />
   }
 
