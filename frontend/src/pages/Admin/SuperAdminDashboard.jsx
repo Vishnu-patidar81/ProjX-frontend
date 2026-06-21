@@ -453,11 +453,13 @@ export default function SuperAdminDashboard() {
                           <td className="p-4 font-semibold text-gray-800">{inv.email}</td>
                           <td className="p-4 text-gray-600">{inv.collegeId?.name || 'N/A'}</td>
                           <td className="p-4">
-                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold
-                              ${inv.status === 'Accepted' ? 'bg-emerald-50 text-emerald-600'
-                                : inv.status === 'Pending' ? 'bg-amber-50 text-amber-600'
-                                : inv.status === 'Resent' ? 'bg-blue-50 text-blue-600'
-                                : 'bg-red-50 text-red-600'}`}>
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold border
+                              ${inv.status === 'Accepted' ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : inv.status === 'Pending' ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                : inv.status === 'Resent' ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : inv.status === 'Cancelled' ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                : inv.status === 'Expired' ? 'bg-red-50 text-red-700 border-red-200'
+                                : 'bg-gray-100 text-gray-700 border-gray-300'}`}>
                               {inv.status}
                             </span>
                           </td>

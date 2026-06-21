@@ -393,7 +393,17 @@ export default function CollegeAdminDashboard() {
   // Sections CRUD
   const handleOpenSectionModal = (mode, data = null) => {
     if (mode === 'create') {
-      setSectionForm({ name: '', academicSessionId: sessions[0]?._id || '', academicYearId: academicYears[0]?._id || '', departmentId: departments[0]?._id || '', status: 'Active' })
+      const defaultSessionId = sessions[0]?._id || '';
+      const defaultFilteredYears = academicYears.filter(
+        (y) => (y.academicSessionId?._id || y.academicSessionId) === defaultSessionId
+      );
+      setSectionForm({
+        name: '',
+        academicSessionId: defaultSessionId,
+        academicYearId: defaultFilteredYears[0]?._id || '',
+        departmentId: departments[0]?._id || '',
+        status: 'Active'
+      })
     } else {
       setSectionForm({
         name: data.name,
@@ -473,6 +483,21 @@ export default function CollegeAdminDashboard() {
     navigator.clipboard.writeText(text)
     toast.success('Activation link copied!')
   }
+
+  const handleSessionChangeForSection = (sessionId) => {
+    const filtered = academicYears.filter(
+      (y) => (y.academicSessionId?._id || y.academicSessionId) === sessionId
+    );
+    setSectionForm({
+      ...sectionForm,
+      academicSessionId: sessionId,
+      academicYearId: filtered[0]?._id || ''
+    });
+  }
+
+  const filteredAcademicYearsForSection = academicYears.filter(
+    (y) => (y.academicSessionId?._id || y.academicSessionId) === sectionForm.academicSessionId
+  );
 
   const filteredTeachers = teachers.filter((t) => {
     const searchMatch =
@@ -1190,11 +1215,13 @@ export default function CollegeAdminDashboard() {
                             <div className="text-gray-400">{inv.designation || 'N/A'}</div>
                           </td>
                           <td className="p-4">
-                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold
-                              ${inv.status === 'Accepted' ? 'bg-emerald-50 text-emerald-600'
-                                : inv.status === 'Pending' ? 'bg-amber-50 text-amber-600'
-                                : inv.status === 'Resent' ? 'bg-blue-50 text-blue-600'
-                                : 'bg-red-50 text-red-600'}`}>
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold border
+                              ${inv.status === 'Accepted' ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : inv.status === 'Pending' ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                : inv.status === 'Resent' ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : inv.status === 'Cancelled' ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                : inv.status === 'Expired' ? 'bg-red-50 text-red-700 border-red-200'
+                                : 'bg-gray-100 text-gray-700 border-gray-300'}`}>
                               {inv.status}
                             </span>
                           </td>
@@ -1255,7 +1282,7 @@ export default function CollegeAdminDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Email Address</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Official Email</label>
                   <input
                     type="email"
                     value={teacherForm.email}
@@ -1270,31 +1297,19 @@ export default function CollegeAdminDashboard() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Phone Number</label>
-                  <input
-                    value={teacherForm.phoneNumber}
-                    onChange={(e) => setTeacherForm({ ...teacherForm, phoneNumber: e.target.value })}
-                    placeholder="10-digit mobile"
-                    className="input-field"
-                    required
-                  />
-                </div>
-                <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Employee ID</label>
                   <input
                     value={teacherForm.facultyId}
                     onChange={(e) => setTeacherForm({ ...teacherForm, facultyId: e.target.value })}
                     placeholder="e.g. EMP001"
                     className="input-field"
+                    required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Department</label>
                   <select
-                    value={teacherForm.department}
+                    value={departments.find(d => d.name.toLowerCase() === teacherForm.department?.toLowerCase())?.name || teacherForm.department || ''}
                     onChange={(e) => setTeacherForm({ ...teacherForm, department: e.target.value })}
                     className="input-field"
                     required
@@ -1305,42 +1320,35 @@ export default function CollegeAdminDashboard() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Designation</label>
-                  <input
-                    value={teacherForm.designation}
-                    onChange={(e) => setTeacherForm({ ...teacherForm, designation: e.target.value })}
-                    placeholder="e.g. Assistant Professor"
-                    className="input-field"
-                    required
-                  />
-                </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                <input
-                  type="checkbox"
-                  checked={teacherForm.guideEligible}
-                  onChange={(e) => setTeacherForm({ ...teacherForm, guideEligible: e.target.checked })}
-                  className="w-5 h-5 text-primary-600 rounded"
-                />
-                <div>
-                  <label className="text-sm font-semibold text-gray-700 block">Guide Eligible</label>
-                  <span className="text-xs text-gray-400">Can this teacher act as a project guide?</span>
-                </div>
-              </div>
-
-              {teacherModal.mode === 'edit' && (
-                <div className="flex items-center gap-3">
+              <div className="grid grid-cols-2 gap-3 items-center">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
                   <input
                     type="checkbox"
-                    checked={teacherForm.isActive}
-                    onChange={(e) => setTeacherForm({ ...teacherForm, isActive: e.target.checked })}
+                    checked={teacherForm.guideEligible}
+                    onChange={(e) => setTeacherForm({ ...teacherForm, guideEligible: e.target.checked })}
                     className="w-5 h-5 text-primary-600 rounded"
                   />
-                  <label className="text-sm font-semibold text-gray-700">Account is Active</label>
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 block">Guide Eligible</label>
+                    <span className="text-xs text-gray-400">Can act as guide?</span>
+                  </div>
                 </div>
-              )}
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Status</label>
+                  <select
+                    value={teacherForm.isActive ? 'Active' : 'Inactive'}
+                    onChange={(e) => setTeacherForm({ ...teacherForm, isActive: e.target.value === 'Active' })}
+                    className="input-field"
+                    required
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
 
               <button
                 type="submit"
@@ -1397,31 +1405,19 @@ export default function CollegeAdminDashboard() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Phone Number</label>
-                  <input
-                    value={guideForm.phoneNumber}
-                    onChange={(e) => setGuideForm({ ...guideForm, phoneNumber: e.target.value })}
-                    placeholder="10-digit mobile"
-                    className="input-field"
-                    required
-                  />
-                </div>
-                <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Employee ID</label>
                   <input
                     value={guideForm.facultyId}
                     onChange={(e) => setGuideForm({ ...guideForm, facultyId: e.target.value })}
                     placeholder="e.g. EMP100"
                     className="input-field"
+                    required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Department</label>
                   <select
-                    value={guideForm.department}
+                    value={departments.find(d => d.name.toLowerCase() === guideForm.department?.toLowerCase())?.name || guideForm.department || ''}
                     onChange={(e) => setGuideForm({ ...guideForm, department: e.target.value })}
                     className="input-field"
                     required
@@ -1432,29 +1428,20 @@ export default function CollegeAdminDashboard() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Designation</label>
-                  <input
-                    value={guideForm.designation}
-                    onChange={(e) => setGuideForm({ ...guideForm, designation: e.target.value })}
-                    placeholder="e.g. Professor"
-                    className="input-field"
-                    required
-                  />
-                </div>
               </div>
 
-              {guideModal.mode === 'edit' && (
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={guideForm.isActive}
-                    onChange={(e) => setGuideForm({ ...guideForm, isActive: e.target.checked })}
-                    className="w-5 h-5 text-primary-600 rounded"
-                  />
-                  <label className="text-sm font-semibold text-gray-700">Account is Active</label>
-                </div>
-              )}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Status</label>
+                <select
+                  value={guideForm.isActive ? 'Active' : 'Inactive'}
+                  onChange={(e) => setGuideForm({ ...guideForm, isActive: e.target.value === 'Active' })}
+                  className="input-field"
+                  required
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
 
               <button
                 type="submit"
@@ -1701,14 +1688,15 @@ export default function CollegeAdminDashboard() {
                 />
               </div>
 
-              <div>
+               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Academic Session</label>
                 <select
                   value={sectionForm.academicSessionId}
-                  onChange={(e) => setSectionForm({ ...sectionForm, academicSessionId: e.target.value })}
+                  onChange={(e) => handleSessionChangeForSection(e.target.value)}
                   className="input-field"
                   required
                 >
+                  <option value="">Select Academic Session</option>
                   {sessions.map((s) => (
                     <option key={s._id} value={s._id}>{s.name}</option>
                   ))}
@@ -1723,9 +1711,15 @@ export default function CollegeAdminDashboard() {
                   className="input-field"
                   required
                 >
-                  {academicYears.map((y) => (
-                    <option key={y._id} value={y._id}>{y.academicSessionId?.name} - {y.yearValue}st Year</option>
-                  ))}
+                  <option value="">Select Academic Year</option>
+                  {filteredAcademicYearsForSection.map((y) => {
+                    const yearLabels = { 1: '1st Year', 2: '2nd Year', 3: '3rd Year', 4: '4th Year' };
+                    return (
+                      <option key={y._id} value={y._id}>
+                        {yearLabels[y.yearValue] || `${y.yearValue} Year`}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 

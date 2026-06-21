@@ -50,11 +50,13 @@ export default function ActivateAccount() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!form.name || !form.phoneNumber || !form.password || !form.confirmPassword) {
+    const isFaculty = invite?.role === 'teacher' || invite?.role === 'guide';
+
+    if (!form.name || (!isFaculty && !form.phoneNumber) || !form.password || !form.confirmPassword) {
       return toast.error('All fields are required')
     }
 
-    if (form.phoneNumber.length !== 10 || isNaN(Number(form.phoneNumber))) {
+    if (!isFaculty && (form.phoneNumber.length !== 10 || isNaN(Number(form.phoneNumber)))) {
       return toast.error('Phone number must be a 10-digit number')
     }
 
@@ -71,9 +73,9 @@ export default function ActivateAccount() {
       const payload = {
         token,
         name: form.name,
-        phoneNumber: form.phoneNumber,
+        phoneNumber: isFaculty ? undefined : form.phoneNumber,
         password: form.password,
-        facultyId: (invite.role === 'teacher' || invite.role === 'guide') ? form.facultyId || invite.facultyId : undefined,
+        facultyId: isFaculty ? invite.facultyId : undefined,
         className: invite.className,
         section: invite.section,
         year: invite.year,
@@ -126,6 +128,8 @@ export default function ActivateAccount() {
     )
   }
 
+  const isFaculty = invite?.role === 'teacher' || invite?.role === 'guide';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-700 to-accent flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
@@ -153,55 +157,49 @@ export default function ActivateAccount() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-              <div className="relative">
-                <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Enter your full name"
-                  className="input-field pl-10"
-                  required
-                  disabled={!!invite?.name}
-                />
-              </div>
-            </div>
-
-            {/* Mobile Number */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number (10 digits)</label>
-              <div className="relative">
-                <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  name="phoneNumber"
-                  value={form.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="Enter 10-digit mobile number"
-                  className="input-field pl-10"
-                  required
-                  disabled={!!invite?.phoneNumber}
-                />
-              </div>
-            </div>
-
-            {/* Faculty ID if teacher or guide */}
-            {(invite?.role === 'teacher' || invite?.role === 'guide') && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
-                <div className="relative">
-                  <FiAward className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    name="facultyId"
-                    value={form.facultyId}
-                    onChange={handleChange}
-                    placeholder="e.g. EMP001"
-                    className="input-field pl-10"
-                    disabled={!!invite?.facultyId}
-                  />
+            {!isFaculty ? (
+              <>
+                {/* Full Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <div className="relative">
+                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      placeholder="Enter your full name"
+                      className="input-field pl-10"
+                      required
+                      disabled={!!invite?.name}
+                    />
+                  </div>
                 </div>
+
+                {/* Mobile Number */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number (10 digits)</label>
+                  <div className="relative">
+                    <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      name="phoneNumber"
+                      value={form.phoneNumber}
+                      onChange={handleChange}
+                      placeholder="Enter 10-digit mobile number"
+                      className="input-field pl-10"
+                      required
+                      disabled={!!invite?.phoneNumber}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4 space-y-2 text-sm text-gray-700">
+                <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-1">Faculty Account Profile (Read-Only)</p>
+                <div><strong>Employee ID:</strong> {invite?.facultyId || 'N/A'}</div>
+                <div><strong>Name:</strong> {invite?.name || 'N/A'}</div>
+                <div><strong>Official Email:</strong> {invite?.email || 'N/A'}</div>
+                <div><strong>Department:</strong> {invite?.department || invite?.className || 'N/A'}</div>
               </div>
             )}
 
