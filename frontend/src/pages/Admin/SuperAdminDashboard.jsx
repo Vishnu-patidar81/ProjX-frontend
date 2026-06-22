@@ -53,6 +53,8 @@ export default function SuperAdminDashboard() {
   const [subscriptionModal, setSubscriptionModal] = useState({ open: false, college: null })
   const [planModal, setPlanModal] = useState({ open: false, mode: 'create', data: null })
   const [tempPasswordAlert, setTempPasswordAlert] = useState(null)
+  const [deleteCollegeModal, setDeleteCollegeModal] = useState({ open: false, college: null })
+  const [deleteAdminModal, setDeleteAdminModal] = useState({ open: false, admin: null })
 
   // Form states
   const [collegeForm, setCollegeForm] = useState({
@@ -347,6 +349,45 @@ export default function SuperAdminDashboard() {
       fetchAuditLogs()
     } catch (err) {
       toast.error('Failed to complete action')
+    }
+  }
+
+  const handleDeleteCollege = async () => {
+    if (!deleteCollegeModal.college) return
+    setLoading(true)
+    try {
+      await api.delete(`/colleges/${deleteCollegeModal.college._id}`)
+      toast.success('College and all associated data deleted permanently')
+      setDeleteCollegeModal({ open: false, college: null })
+      if (selectedCollege && selectedCollege._id === deleteCollegeModal.college._id) {
+        setSelectedCollege(null)
+      }
+      fetchColleges()
+      fetchCollegeAdmins()
+      fetchStats()
+      fetchAuditLogs()
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete college')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteAdmin = async () => {
+    if (!deleteAdminModal.admin) return
+    setLoading(true)
+    try {
+      await api.delete(`/admin/college-admins/${deleteAdminModal.admin.id}`)
+      toast.success('College Admin permanently deleted')
+      setDeleteAdminModal({ open: false, admin: null })
+      fetchCollegeAdmins()
+      fetchColleges()
+      fetchStats()
+      fetchAuditLogs()
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete admin')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -977,6 +1018,14 @@ export default function SuperAdminDashboard() {
                                   Archive
                                 </button>
                               )}
+                              <button
+                                onClick={() => setDeleteCollegeModal({ open: true, college: c })}
+                                className="text-red-600 hover:text-red-850 hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-200 dark:border-red-900/50 px-2.5 py-1 rounded-lg font-semibold inline-flex items-center gap-1"
+                                title="Delete College"
+                              >
+                                <FiTrash2 className="w-3.5 h-3.5" />
+                                Delete
+                              </button>
                             </td>
                           </tr>
                         ))
@@ -1220,6 +1269,13 @@ export default function SuperAdminDashboard() {
                                 title="Edit Admin Details"
                               >
                                 <FiEdit className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setDeleteAdminModal({ open: true, admin: a })}
+                                className="text-red-600 hover:text-red-850 hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-200 dark:border-red-900/50 p-1.5 rounded-lg inline-flex"
+                                title="Delete Admin"
+                              >
+                                <FiTrash2 className="w-3.5 h-3.5" />
                               </button>
                               
                               {a.isInvite ? (
@@ -2084,6 +2140,96 @@ export default function SuperAdminDashboard() {
                 {loading ? 'Saving Billing Plan...' : 'Save Plan Details'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete College Confirmation Modal */}
+      {deleteCollegeModal.open && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100 dark:border-gray-700 text-xs">
+            <button
+              onClick={() => setDeleteCollegeModal({ open: false, college: null })}
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-655 dark:hover:text-gray-200"
+              aria-label="Close Modal"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-2 uppercase tracking-wider flex items-center gap-2">
+              <FiAlertTriangle className="text-red-500 w-5 h-5" />
+              Delete College
+            </h2>
+            <div className="text-gray-700 dark:text-gray-300 mt-2 mb-4 leading-relaxed space-y-2">
+              <p>Are you sure you want to permanently delete this college?</p>
+              <p>This action cannot be undone.</p>
+              <p className="bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 p-2.5 rounded-xl font-semibold text-red-700 dark:text-red-400">
+                Selected: {deleteCollegeModal.college?.name}
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 font-semibold">
+              <button
+                type="button"
+                onClick={() => setDeleteCollegeModal({ open: false, college: null })}
+                className="px-4 py-2 border border-gray-200 dark:border-gray-750 bg-gray-55 dark:bg-gray-800 rounded-xl text-gray-750 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={handleDeleteCollege}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer border-none"
+              >
+                {loading ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Admin Confirmation Modal */}
+      {deleteAdminModal.open && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-100 dark:border-gray-700 text-xs">
+            <button
+              onClick={() => setDeleteAdminModal({ open: false, admin: null })}
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-655 dark:hover:text-gray-200"
+              aria-label="Close Modal"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-2 uppercase tracking-wider flex items-center gap-2">
+              <FiAlertTriangle className="text-red-500 w-5 h-5" />
+              Delete College Admin
+            </h2>
+            <div className="text-gray-700 dark:text-gray-300 mt-2 mb-4 leading-relaxed space-y-2">
+              <p>Are you sure you want to permanently delete this college admin?</p>
+              <p>This action cannot be undone.</p>
+              <p className="bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 p-2.5 rounded-xl font-semibold text-red-700 dark:text-red-400">
+                Selected: {deleteAdminModal.admin?.name} ({deleteAdminModal.admin?.email})
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 font-semibold">
+              <button
+                type="button"
+                onClick={() => setDeleteAdminModal({ open: false, admin: null })}
+                className="px-4 py-2 border border-gray-200 dark:border-gray-750 bg-gray-55 dark:bg-gray-800 rounded-xl text-gray-750 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={handleDeleteAdmin}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer border-none"
+              >
+                {loading ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}
