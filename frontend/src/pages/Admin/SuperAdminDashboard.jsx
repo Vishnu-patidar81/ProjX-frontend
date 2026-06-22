@@ -186,7 +186,7 @@ export default function SuperAdminDashboard() {
 
   const handleSaveCollege = async (e) => {
     e.preventDefault()
-    if (!collegeForm.name || !collegeForm.code || !collegeForm.email || !collegeForm.phone || !collegeForm.address) {
+    if (!collegeForm.name || !collegeForm.code || !collegeForm.email || !collegeForm.phone) {
       return toast.error('Please fill in all mandatory fields')
     }
     setLoading(true)
@@ -1090,15 +1090,23 @@ export default function SuperAdminDashboard() {
                     </span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Subscription Plan</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider block mb-1">Subscription Plan</span>
                     <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{selectedCollege.subscription?.planId?.name || 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Expiry Date</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider block mb-1">Payment Status</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 capitalize">{selectedCollege.subscription?.paymentStatus || 'Paid'}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider block mb-1">Trial Status</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 capitalize">{selectedCollege.subscription?.status || 'Active'}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider block mb-1">Expiry Date</span>
                     <span className="text-sm text-gray-750 dark:text-gray-305">{new Date(selectedCollege.subscription?.expiresAt).toLocaleString()} ({getRemainingDays(selectedCollege.subscription?.expiresAt)})</span>
                   </div>
                   <div>
-                    <span className="font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Assigned Admin</span>
+                    <span className="font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider block mb-1">Assigned Admin</span>
                     <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{selectedCollege.adminUser ? `${selectedCollege.adminUser.name} (${selectedCollege.adminUser.email})` : 'No Admin Assigned'}</span>
                   </div>
                   <div>
@@ -1722,106 +1730,230 @@ export default function SuperAdminDashboard() {
             </h2>
 
             <form onSubmit={handleSaveCollege} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">College Name</label>
-                <input
-                  value={collegeForm.name}
-                  onChange={(e) => setCollegeForm({ ...collegeForm, name: e.target.value })}
-                  placeholder="e.g. BITS Pilani"
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
-                  required
-                />
-              </div>
+              {collegeModal.mode === 'create' ? (
+                <>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">College Name *</label>
+                    <input
+                      value={collegeForm.name}
+                      onChange={(e) => setCollegeForm({ ...collegeForm, name: e.target.value })}
+                      placeholder="e.g. BITS Pilani"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                      required
+                    />
+                  </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">College Code</label>
-                  <input
-                    value={collegeForm.code}
-                    onChange={(e) => setCollegeForm({ ...collegeForm, code: e.target.value })}
-                    placeholder="e.g. BITS"
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 uppercase text-gray-900 dark:text-white"
-                    disabled={collegeModal.mode === 'edit'}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">URL Tenant Slug</label>
-                  <input
-                    value={collegeForm.slug}
-                    onChange={(e) => setCollegeForm({ ...collegeForm, slug: e.target.value })}
-                    placeholder="e.g. bits-pilani"
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
-                    disabled={collegeModal.mode === 'edit'}
-                  />
-                </div>
-              </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">College Code *</label>
+                      <input
+                        value={collegeForm.code}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, code: e.target.value })}
+                        placeholder="e.g. BITS"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 uppercase text-gray-900 dark:text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Official Email *</label>
+                      <input
+                        type="email"
+                        value={collegeForm.email}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, email: e.target.value })}
+                        placeholder="admin@bits.edu"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                        required
+                      />
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Official Email</label>
-                  <input
-                    type="email"
-                    value={collegeForm.email}
-                    onChange={(e) => setCollegeForm({ ...collegeForm, email: e.target.value })}
-                    placeholder="admin@bits.edu"
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Contact Phone</label>
-                  <input
-                    value={collegeForm.phone}
-                    onChange={(e) => setCollegeForm({ ...collegeForm, phone: e.target.value })}
-                    placeholder="+91-..."
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
-                    required
-                  />
-                </div>
-              </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Contact Number *</label>
+                      <input
+                        value={collegeForm.phone}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, phone: e.target.value })}
+                        placeholder="+91-..."
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Status</label>
+                      <select
+                        value={collegeForm.status}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, status: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Campuses Location Address</label>
-                <textarea
-                  value={collegeForm.address}
-                  onChange={(e) => setCollegeForm({ ...collegeForm, address: e.target.value })}
-                  placeholder="Street details..."
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 h-16 text-gray-900 dark:text-white"
-                  required
-                />
-              </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Website (Optional)</label>
+                      <input
+                        value={collegeForm.website}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, website: e.target.value })}
+                        placeholder="www.bits.edu"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Address (Optional)</label>
+                      <input
+                        value={collegeForm.address}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, address: e.target.value })}
+                        placeholder="BITS Pilani Campus..."
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">College Name *</label>
+                    <input
+                      value={collegeForm.name}
+                      onChange={(e) => setCollegeForm({ ...collegeForm, name: e.target.value })}
+                      placeholder="e.g. BITS Pilani"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                      required
+                    />
+                  </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Website URL</label>
-                  <input
-                    value={collegeForm.website}
-                    onChange={(e) => setCollegeForm({ ...collegeForm, website: e.target.value })}
-                    placeholder="www.bits.edu"
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
-                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider mb-1">College Code</label>
+                      <input
+                        value={collegeForm.code}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, code: e.target.value })}
+                        placeholder="e.g. BITS"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 uppercase text-gray-900 dark:text-white"
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider mb-1">URL Tenant Slug</label>
+                      <input
+                        value={collegeForm.slug}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, slug: e.target.value })}
+                        placeholder="e.g. bits-pilani"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider mb-1">Official Email *</label>
+                      <input
+                        type="email"
+                        value={collegeForm.email}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, email: e.target.value })}
+                        placeholder="admin@bits.edu"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider mb-1">Contact Phone *</label>
+                      <input
+                        value={collegeForm.phone}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, phone: e.target.value })}
+                        placeholder="+91-..."
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider mb-1">Website URL</label>
+                      <input
+                        value={collegeForm.website}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, website: e.target.value })}
+                        placeholder="www.bits.edu"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider mb-1">Record Status</label>
+                      <select
+                        value={collegeForm.status}
+                        onChange={(e) => setCollegeForm({ ...collegeForm, status: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                        <option value="Deactivated">Archived</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider mb-1">Campuses Location Address</label>
+                    <textarea
+                      value={collegeForm.address}
+                      onChange={(e) => setCollegeForm({ ...collegeForm, address: e.target.value })}
+                      placeholder="Street details..."
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 h-12 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Advanced SaaS details visible ONLY in edit mode */}
+              {collegeModal.mode === 'edit' && collegeModal.data && (
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-4 mt-4">
+                  <h3 className="text-xs font-bold text-gray-900 dark:text-white mb-2 uppercase tracking-wider">
+                    SaaS & Subscription Details
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 bg-gray-55 dark:bg-[#0F172A] p-3 rounded-xl border border-gray-150 dark:border-gray-850">
+                    <div>
+                      <span className="block text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase">Subscription Plan</span>
+                      <span className="text-[11px] font-semibold text-gray-850 dark:text-gray-200">{collegeModal.data.subscription?.planId?.name || 'Free Trial'}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase">Payment Status</span>
+                      <span className="text-[11px] font-semibold text-gray-850 dark:text-gray-200 capitalize">{collegeModal.data.subscription?.paymentStatus || 'Paid'}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] font-bold text-gray-400 dark:text-gray-550 uppercase">Trial Status</span>
+                      <span className="text-[11px] font-semibold text-gray-850 dark:text-gray-200 capitalize">{collegeModal.data.subscription?.status || 'Active'}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] font-bold text-gray-400 dark:text-gray-550 uppercase">Trial Days Remaining</span>
+                      <span className="text-[11px] font-semibold text-gray-850 dark:text-gray-200">{getRemainingDays(collegeModal.data.subscription?.expiresAt)}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="block text-[9px] font-bold text-gray-400 dark:text-gray-550 uppercase">Assigned College Admin</span>
+                      <span className="text-[11px] font-semibold text-gray-850 dark:text-gray-200 truncate max-w-full block" title={collegeModal.data.adminUser ? `${collegeModal.data.adminUser.name} (${collegeModal.data.adminUser.email})` : 'None'}>
+                        {collegeModal.data.adminUser ? `${collegeModal.data.adminUser.name} (${collegeModal.data.adminUser.email})` : 'None'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] font-bold text-gray-400 dark:text-gray-555 uppercase">Created Date</span>
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400">{new Date(collegeModal.data.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] font-bold text-gray-400 dark:text-gray-555 uppercase">Updated Date</span>
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400">{new Date(collegeModal.data.updatedAt).toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Record Status</label>
-                  <select
-                    value={collegeForm.status}
-                    onChange={(e) => setCollegeForm({ ...collegeForm, status: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white bg-white cursor-pointer"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                    <option value="Deactivated">Archived</option>
-                  </select>
-                </div>
-              </div>
+              )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center border-none"
+                className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold py-2.5 rounded-xl transition-all shadow text-center border-none cursor-pointer"
               >
-                {loading ? 'Saving tenant...' : 'Commit Tenant configurations'}
+                {loading ? 'Saving tenant...' : collegeModal.mode === 'create' ? 'Create College' : 'Save Changes'}
               </button>
             </form>
           </div>
