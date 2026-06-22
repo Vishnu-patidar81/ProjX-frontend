@@ -24,7 +24,16 @@ export default function Navbar({ onToggleSidebar }) {
 
   useEffect(() => {
     if (!socket || !user) return
-    const handleNewNotif = () => setUnreadCount(prev => prev + 1)
+    const handleNewNotif = (newNotif) => {
+      if (user?.role === 'teacher') {
+        const belongsToGuide = ['guide_assignment', 'guide_assigned', 'meeting_scheduled', 'meeting_accepted', 'meeting_rejected', 'meeting_report', 'chat_message', 'progress_update', 'progress_updated'].includes(newNotif?.type) || (newNotif?.type === 'student_file_submission' && newNotif?.metadata?.submissionType === 'guide');
+        const belongsToTeacher = ['project_submission', 'student_added', 'student_imported', 'student_import_finished', 'student_import_failed', 'group_invite', 'group_accepted', 'group_rejected'].includes(newNotif?.type) || (newNotif?.type === 'student_file_submission' && newNotif?.metadata?.submissionType === 'teacher');
+        
+        if (activeMode === 'guide' && !belongsToGuide && newNotif?.type !== 'announcement') return;
+        if (activeMode === 'teacher' && !belongsToTeacher && newNotif?.type !== 'announcement') return;
+      }
+      setUnreadCount(prev => prev + 1)
+    }
     const handleReadNotif = () => setUnreadCount(prev => Math.max(0, prev - 1))
     const handleReadAllNotif = () => setUnreadCount(0)
 
@@ -37,7 +46,7 @@ export default function Navbar({ onToggleSidebar }) {
       socket.off('notification:read', handleReadNotif)
       socket.off('notification:read-all', handleReadAllNotif)
     }
-  }, [socket, user])
+  }, [socket, user, activeMode])
 
   const handleLogout = () => {
     logout()

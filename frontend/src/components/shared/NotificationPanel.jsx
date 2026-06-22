@@ -100,6 +100,14 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
       setUnreadCount(0)
     }
     const handleSocketNew = (newNotif) => {
+      if (user?.role === 'teacher') {
+        const belongsToGuide = ['guide_assignment', 'guide_assigned', 'meeting_scheduled', 'meeting_accepted', 'meeting_rejected', 'meeting_report', 'chat_message', 'progress_update', 'progress_updated'].includes(newNotif?.type) || (newNotif?.type === 'student_file_submission' && newNotif?.metadata?.submissionType === 'guide');
+        const belongsToTeacher = ['project_submission', 'student_added', 'student_imported', 'student_import_finished', 'student_import_failed', 'group_invite', 'group_accepted', 'group_rejected'].includes(newNotif?.type) || (newNotif?.type === 'student_file_submission' && newNotif?.metadata?.submissionType === 'teacher');
+        
+        if (activeMode === 'guide' && !belongsToGuide && newNotif?.type !== 'announcement') return;
+        if (activeMode === 'teacher' && !belongsToTeacher && newNotif?.type !== 'announcement') return;
+      }
+
       setNotifications(prev => {
         if (prev.some(n => n._id === newNotif._id)) return prev;
         return [newNotif, ...prev].slice(0, 100);
@@ -116,7 +124,7 @@ export default function NotificationPanel({ onClose, setUnreadCount, activeMode 
       socket.off('notification:read-all', handleSocketReadAll)
       socket.off('notification:new', handleSocketNew)
     }
-  }, [socket])
+  }, [socket, user, activeMode])
 
   const handleNotificationClick = async (n) => {
     if (!n.isRead) {
