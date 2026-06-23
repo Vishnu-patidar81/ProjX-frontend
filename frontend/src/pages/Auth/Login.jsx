@@ -34,15 +34,15 @@ export default function Login() {
       const { data } = await api.post('/auth/login', form)
       login(data.user, data.token)
       toast.success(`Welcome back, ${data.user.name}!`)
-      
+
       if (data.user.mustChangePassword) {
         navigate('/change-password')
       } else {
         const dash = data.user.role === 'super_admin' ? '/system/dashboard'
           : (data.user.role === 'admin' || data.user.role === 'college_admin') ? '/admin/dashboard'
-          : data.user.role === 'teacher' ? '/teacher/dashboard'
-          : data.user.role === 'guide' ? '/guide/dashboard'
-          : '/student/dashboard'
+            : data.user.role === 'teacher' ? '/teacher/dashboard'
+              : data.user.role === 'guide' ? '/guide/dashboard'
+                : '/student/dashboard'
         navigate(dash)
       }
     } catch (err) {
@@ -61,7 +61,7 @@ export default function Login() {
             <span className="text-primary-700 font-bold text-xl">PX</span>
           </div>
           <h1 className="text-white text-2xl font-bold">ProjX</h1>
-          <p className="text-primary-200 text-sm mt-1">Minor Project Management System</p>
+          <p className="text-primary-200 text-sm mt-1">Project Management System</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
